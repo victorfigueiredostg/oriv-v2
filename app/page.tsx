@@ -1,12 +1,40 @@
+'use client'
+
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma'
 
-export default async function Home() {
-  const empreendimentos = await prisma.empreendimento.findMany({
-    where: { ativo: true },
-    orderBy: { nome: 'asc' },
-  })
+interface Empreendimento {
+  id: number
+  nome: string
+  slug: string
+  iconeUrl: string | null
+}
+
+export default function Home() {
+  const [empreendimentos, setEmpreendimentos] = useState<Empreendimento[]>([])
+  const [carregando, setCarregando] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/empreendimentos/publico')
+      .then((res) => res.json())
+      .then((data) => {
+        setEmpreendimentos(data)
+        setCarregando(false)
+      })
+      .catch((error) => {
+        console.error('Erro ao carregar empreendimentos:', error)
+        setCarregando(false)
+      })
+  }, [])
+
+  if (carregando) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-xl text-gray-900">Carregando...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">

@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { message: 'Dados inválidos', errors: error.errors },
+        { message: 'Dados inválidos', errors: error.issues },
         { status: 400 }
       )
     }
