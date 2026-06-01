@@ -1,36 +1,270 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ORIV 2.0
 
-## Getting Started
+Sistema de registro e gestão de visitas para empreendimentos imobiliários.
 
-First, run the development server:
+## 🚀 Stack Tecnológica
+
+- **Next.js 15** (App Router, TypeScript, Tailwind CSS)
+- **Prisma ORM** com MySQL (Hostinger)
+- **NextAuth.js** para autenticação
+- **Bcryptjs** para hash de senhas
+- **Zod** para validação
+- **Cloudinary** para armazenamento de imagens
+
+## 📦 Estrutura do Banco de Dados
+
+### Modelos
+
+- **Empreendimento**: Cadastro dos empreendimentos imobiliários
+- **Usuario**: Usuários do sistema (ADMIN ou STAND)
+- **Visita**: Registro de visitas aos stands
+
+### Enums
+
+- **Role**: `ADMIN` | `STAND`
+- **ComoChegou**: `AGENDADO_CORRETOR` | `CLIENTE_PASSANTE`
+- **ComoSoube**: `INSTAGRAM` | `FACEBOOK` | `WHATSAPP` | `CORRETOR` | `PANFLETO` | `TV` | `RADIO` | `STAND_CENTRAL_VENDAS` | `INDICACAO` | `OUTDOOR` | `OBRA`
+
+## 🎯 Funcionalidades
+
+### Acesso Público
+
+- **Landing Page** (`/`): Cards dos empreendimentos ativos com acesso ao login
+
+### Área do Stand (role: STAND)
+
+- **Login** (`/login/[slug]`): Autenticação específica por empreendimento
+- **Registro de Visita** (`/visita`): Formulário otimizado para tablet com todos os campos obrigatórios
+- **Lista de Visitas** (`/visitas`): Visualização das visitas do empreendimento com paginação
+- **Dashboard** (`/dashboard`): Métricas e estatísticas do empreendimento
+
+### Área Administrativa (role: ADMIN)
+
+- **Login Admin** (`/admin/login`): Autenticação do gestor
+- **Painel Admin** (`/admin`): Visão geral de todos os empreendimentos
+- **Criar Empreendimento** (`/admin/empreendimentos/novo`): Cadastro com upload de logo e ícone
+- **Visão Global de Visitas**: Acesso a todas as visitas de todos os empreendimentos
+
+## 🔧 Instalação e Configuração
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/victorfigueiredostg/oriv-v2.git
+cd oriv-v2
+```
+
+### 2. Instalar dependências
+
+```bash
+npm install
+```
+
+### 3. Configurar variáveis de ambiente
+
+Crie o arquivo `.env.local`:
+
+```env
+# Database
+DATABASE_URL="mysql://usuario:senha@host:3306/database"
+
+# NextAuth
+NEXTAUTH_SECRET="seu-secret-aqui"
+NEXTAUTH_URL="http://localhost:3000"
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME="seu-cloud-name"
+CLOUDINARY_API_KEY="sua-api-key"
+CLOUDINARY_API_SECRET="seu-api-secret"
+
+# App
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+### 4. Criar banco de dados
+
+**Opção A - Via Prisma (se acesso remoto configurado):**
+
+```bash
+npx prisma migrate dev --name init
+npm run seed
+```
+
+**Opção B - Via phpMyAdmin:**
+
+Execute o arquivo `setup-database.sql` no phpMyAdmin da Hostinger.
+
+### 5. Gerar Prisma Client
+
+```bash
+npx prisma generate
+```
+
+### 6. Rodar em desenvolvimento
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🔐 Credenciais Padrão
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Admin:**
+- Usuário: `admin`
+- Senha: `admin123`
 
-## Learn More
+## 📤 Deploy na Hostinger
 
-To learn more about Next.js, take a look at the following resources:
+### 1. Configurar variáveis de ambiente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+No painel da Hostinger, adicione as mesmas variáveis do `.env.local`, ajustando:
+- `NEXTAUTH_URL` para a URL de produção
+- `NEXT_PUBLIC_APP_URL` para a URL de produção
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Conectar ao GitHub
 
-## Deploy on Vercel
+Configure o deploy automático:
+- Branch: `main`
+- Build command: `npm run build`
+- Install command: `npm install`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Aplicar migrations em produção
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Via SSH (se disponível):**
+
+```bash
+npx prisma migrate deploy
+```
+
+**Via phpMyAdmin:**
+
+Execute o `setup-database.sql` no banco de produção.
+
+## 🎨 Cloudinary
+
+### Configuração
+
+1. Crie uma conta em https://cloudinary.com
+2. No Dashboard, copie:
+   - Cloud Name
+   - API Key
+   - API Secret
+3. Adicione ao `.env.local`
+
+### Estrutura de pastas
+
+- `oriv/logos`: Logos horizontais dos empreendimentos
+- `oriv/icones`: Ícones quadrados dos empreendimentos
+
+## 📊 API Routes
+
+### Autenticação
+
+- `POST /api/auth/[...nextauth]`: Login e gerenciamento de sessão
+
+### Visitas
+
+- `POST /api/visitas`: Criar nova visita (STAND apenas)
+- `GET /api/visitas?page=1&limit=20`: Listar visitas com paginação
+
+### Empreendimentos
+
+- `POST /api/empreendimentos`: Criar empreendimento (ADMIN apenas)
+- `GET /api/empreendimentos`: Listar todos os empreendimentos (ADMIN apenas)
+
+### Dashboard
+
+- `GET /api/dashboard?periodo=30`: Métricas e estatísticas
+
+### Upload
+
+- `POST /api/upload`: Upload de imagens para Cloudinary (ADMIN apenas)
+
+## 🛡️ Segurança
+
+- Senhas hasheadas com bcryptjs (10 rounds)
+- Autenticação via JWT (NextAuth.js)
+- Middleware de proteção de rotas
+- Validação de dados com Zod
+- CSRF protection via NextAuth
+
+## 🗂️ Estrutura de Pastas
+
+```
+oriv-v2/
+├── app/
+│   ├── (landing)/
+│   │   └── page.tsx
+│   ├── login/
+│   │   └── [slug]/
+│   │       └── page.tsx
+│   ├── visita/
+│   │   └── page.tsx
+│   ├── visitas/
+│   │   └── page.tsx
+│   ├── dashboard/
+│   │   └── page.tsx
+│   ├── admin/
+│   │   ├── login/
+│   │   ├── page.tsx
+│   │   └── empreendimentos/
+│   │       └── novo/
+│   │           └── page.tsx
+│   └── api/
+│       ├── auth/
+│       ├── visitas/
+│       ├── empreendimentos/
+│       ├── dashboard/
+│       └── upload/
+├── components/
+│   └── providers/
+│       └── SessionProvider.tsx
+├── lib/
+│   ├── auth.ts
+│   └── prisma.ts
+├── prisma/
+│   ├── schema.prisma
+│   └── seed.ts
+└── types/
+    └── next-auth.d.ts
+```
+
+## 📝 Scripts Disponíveis
+
+```bash
+npm run dev          # Desenvolvimento
+npm run build        # Build de produção
+npm run start        # Servidor de produção
+npm run lint         # Linter
+npm run seed         # Seed do banco (usuário admin)
+npx prisma studio    # Interface visual do banco
+```
+
+## 🐛 Troubleshooting
+
+### Erro de autenticação no banco
+
+- Verifique se o acesso remoto MySQL está habilitado na Hostinger
+- Verifique se a senha no `DATABASE_URL` está URL-encoded (@ = %40)
+- Teste a conexão via `npx prisma db pull`
+
+### Erro ao fazer upload de imagens
+
+- Verifique se as credenciais do Cloudinary estão corretas
+- Verifique se o limite de upload do Cloudinary não foi atingido
+
+### Erro 401/403 nas rotas protegidas
+
+- Limpe os cookies do navegador
+- Faça logout e login novamente
+- Verifique se o `NEXTAUTH_SECRET` está configurado
+
+## 📞 Suporte
+
+Para dúvidas ou problemas, entre em contato:
+- Email: sertenge@sertenge.com.br
+
+## 📄 Licença
+
+Propriedade de Sertenge Desenvolvimento Imobiliário.

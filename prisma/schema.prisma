@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Empreendimento {
+  id          Int       @id @default(autoincrement())
+  nome        String
+  logoUrl     String?   // URL Cloudinary — logo horizontal (topo do formulário)
+  iconeUrl    String?   // URL Cloudinary — ícone quadrado (card da landing)
+  slug        String    @unique
+  ativo       Boolean   @default(true)
+  criadoEm    DateTime  @default(now())
+  usuarios    Usuario[]
+  visitas     Visita[]
+}
+
+model Usuario {
+  id               Int             @id @default(autoincrement())
+  usuario          String          @unique
+  senhaHash        String
+  role             Role            @default(STAND)
+  empreendimentoId Int?
+  empreendimento   Empreendimento? @relation(fields: [empreendimentoId], references: [id])
+  criadoEm         DateTime        @default(now())
+  visitas          Visita[]
+}
+
+model Visita {
+  id               Int            @id @default(autoincrement())
+  empreendimentoId Int
+  empreendimento   Empreendimento @relation(fields: [empreendimentoId], references: [id])
+  usuarioId        Int
+  usuario          Usuario        @relation(fields: [usuarioId], references: [id])
+  nomeCliente      String
+  comoChegou       ComoChegou
+  corretor         String
+  imobiliaria      String
+  comoSoube        ComoSoube
+  salvoEm          DateTime       @default(now())
+
+  @@index([empreendimentoId])
+  @@index([salvoEm])
+  @@index([corretor])
+  @@index([comoSoube])
+}
+
+enum Role {
+  ADMIN
+  STAND
+}
+
+enum ComoChegou {
+  AGENDADO_CORRETOR
+  CLIENTE_PASSANTE
+}
+
+enum ComoSoube {
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  CORRETOR
+  PANFLETO
+  TV
+  RADIO
+  STAND_CENTRAL_VENDAS
+  INDICACAO
+  OUTDOOR
+  OBRA
+}
