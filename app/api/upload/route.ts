@@ -70,7 +70,12 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erro ao fazer upload:', error)
-    const detalhe = error instanceof Error ? error.message : String(error)
+    const detalhe =
+      error instanceof Error
+        ? error.message
+        : (error as any)?.message ||
+          (error as any)?.error?.message ||
+          JSON.stringify(error)
     return NextResponse.json(
       { message: `Erro ao fazer upload da imagem: ${detalhe}` },
       { status: 500 }
