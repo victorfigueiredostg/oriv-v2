@@ -65,7 +65,8 @@ export default function NovoEmpreendimentoPage() {
     })
 
     if (!response.ok) {
-      throw new Error('Erro ao fazer upload da imagem')
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.message || 'Erro ao fazer upload da imagem')
     }
 
     const data = await response.json()

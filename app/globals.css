@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Campos de formulário sempre com texto escuro (formulários usam fundo branco) */
+input,
+textarea,
+select {
+  color: #171717;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b7280; /* gray-500 */
+}

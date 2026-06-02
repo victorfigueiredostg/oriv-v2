@@ -29,6 +29,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validar configuração do Cloudinary antes de tentar o upload
+    if (
+      !process.env.CLOUDINARY_CLOUD_NAME ||
+      !process.env.CLOUDINARY_API_KEY ||
+      !process.env.CLOUDINARY_API_SECRET
+    ) {
+      return NextResponse.json(
+        { message: 'Cloudinary não configurado no servidor (variáveis CLOUDINARY_*)' },
+        { status: 500 }
+      )
+    }
+
     // Converter File para Buffer
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
@@ -58,8 +70,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('Erro ao fazer upload:', error)
+    const detalhe = error instanceof Error ? error.message : String(error)
     return NextResponse.json(
-      { message: 'Erro ao fazer upload da imagem' },
+      { message: `Erro ao fazer upload da imagem: ${detalhe}` },
       { status: 500 }
     )
   }
