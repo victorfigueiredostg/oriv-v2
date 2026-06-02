@@ -12,62 +12,60 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const periodo = searchParams.get('periodo') || '30' // dias
+    const periodo = parseInt(searchParams.get('periodo') || '30') // dias
+    const comoChegou = searchParams.get('comoChegou') || undefined
+    const comoSoube = searchParams.get('comoSoube') || undefined
+    const empreendimentoIdParam = searchParams.get('empreendimentoId')
 
-    const dataInicio = new Date()
-    dataInicio.setDate(dataInicio.getDate() - parseInt(periodo))
+    const agora = new Date()
+    const dataInicio = new Date(agora)
+    dataInicio.setDate(dataInicio.getDate() - periodo)
+    // Período imediatamente anterior, de mesma duração (para crescimento)
+    const dataInicioAnterior = new Date(agora)
+    dataInicioAnterior.setDate(dataInicioAnterior.getDate() - periodo * 2)
 
-    let where: any = {
-      salvoEm: { gte: dataInicio },
-    }
+    // Filtros comuns (sem a janela de data)
+    const filtrosBase: any = {}
+    if (comoChegou) filtrosBase.comoChegou = comoChegou
+    if (comoSoube) filtrosBase.comoSoube = comoSoube
 
-    // Se for STAND, filtrar apenas seu empreendimento
+    // STAND: restrito ao próprio empreendimento. ADMIN: pode filtrar por um.
     if (session.user.role === 'STAND' && session.user.empreendimentoId) {
-      where.empreendimentoId = session.user.empreendimentoId
+      filtrosBase.empreendimentoId = session.user.empreendimentoId
+    } else if (session.user.role === 'ADMIN' && empreendimentoIdParam) {
+      filtrosBase.empreendimentoId = parseInt(empreendimentoIdParam)
     }
 
-    // Buscar dados
+    const where = { ...filtrosBase, salvoEm: { gte: dataInicio } }
+    const wherePeriodoAnterior = {
+      ...filtrosBase,
+      salvoEm: { gte: dataInicioAnterior, lt: dataInicio },
+    }
+
     const [
       totalVisitas,
-      visitasPorDia,
+      totalAnterior,
       visitasPorComoChegou,
       visitasPorComoSoube,
       topCorretores,
       topImobiliarias,
+      gruposEmpreendimento,
     ] = await Promise.all([
-      // Total de visitas
       prisma.visita.count({ where }),
+      prisma.visita.count({ where: wherePeriodoAnterior }),
 
-      // Visitas por dia
-      prisma.$queryRaw`
-        SELECT
-          DATE(salvoEm) as data,
-          COUNT(*) as total
-        FROM Visita
-        WHERE salvoEm >= ${dataInicio}
-          ${session.user.role === 'STAND' && session.user.empreendimentoId
-            ? prisma.$queryRaw`AND empreendimentoId = ${session.user.empreendimentoId}`
-            : prisma.$queryRaw``}
-        GROUP BY DATE(salvoEm)
-        ORDER BY data DESC
-        LIMIT 30
-      `,
-
-      // Visitas por "Como Chegou"
       prisma.visita.groupBy({
         by: ['comoChegou'],
         where,
         _count: true,
       }),
 
-      // Visitas por "Como Soube"
       prisma.visita.groupBy({
         by: ['comoSoube'],
         where,
         _count: true,
       }),
 
-      // Top Corretores
       prisma.visita.groupBy({
         by: ['corretor'],
         where,
@@ -76,7 +74,6 @@ export async function GET(request: NextRequest) {
         take: 10,
       }),
 
-      // Top Imobiliárias
       prisma.visita.groupBy({
         by: ['imobiliaria'],
         where,
@@ -84,15 +81,50 @@ export async function GET(request: NextRequest) {
         orderBy: { _count: { imobiliaria: 'desc' } },
         take: 10,
       }),
+
+      // Rank de empreendimentos por nº de visitas no período
+      prisma.visita.groupBy({
+        by: ['empreendimentoId'],
+        where,
+        _count: true,
+        orderBy: { _count: { empreendimentoId: 'desc' } },
+      }),
     ])
+
+    // Mapear ids -> nomes para o rank de empreendimentos
+    const ids = gruposEmpreendimento.map((g) => g.empreendimentoId)
+    const nomes = ids.length
+      ? await prisma.empreendimento.findMany({
+          where: { id: { in: ids } },
+          select: { id: true, nome: true },
+        })
+      : []
+    const mapaNomes = Object.fromEntries(nomes.map((e) => [e.id, e.nome]))
+    const rankEmpreendimentos = gruposEmpreendimento.map((g) => ({
+      nome: mapaNomes[g.empreendimentoId] || `#${g.empreendimentoId}`,
+      total: g._count,
+    }))
+
+    // Indicador de crescimento vs período anterior
+    const percentual =
+      totalAnterior === 0
+        ? totalVisitas > 0
+          ? 100
+          : 0
+        : ((totalVisitas - totalAnterior) / totalAnterior) * 100
 
     return NextResponse.json({
       totalVisitas,
-      visitasPorDia,
+      crescimento: {
+        atual: totalVisitas,
+        anterior: totalAnterior,
+        percentual: Math.round(percentual),
+      },
       visitasPorComoChegou,
       visitasPorComoSoube,
       topCorretores,
       topImobiliarias,
+      rankEmpreendimentos,
     })
   } catch (error) {
     console.error('Erro ao buscar dashboard:', error)

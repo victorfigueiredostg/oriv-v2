@@ -87,17 +87,27 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const skip = (page - 1) * limit
 
-    let where: { empreendimentoId?: number } = {}
+    const where: any = {}
 
     // Se for STAND, filtrar apenas visitas do seu empreendimento
     if (session.user.role === 'STAND' && session.user.empreendimentoId) {
-      where = { empreendimentoId: session.user.empreendimentoId }
+      where.empreendimentoId = session.user.empreendimentoId
     } else if (session.user.role === 'ADMIN') {
-      // ADMIN pode filtrar por empreendimento (visitas separadas por empreendimento)
+      // ADMIN pode filtrar por empreendimento e pelos campos da visita
       const empreendimentoId = searchParams.get('empreendimentoId')
-      if (empreendimentoId) {
-        where = { empreendimentoId: parseInt(empreendimentoId) }
-      }
+      if (empreendimentoId) where.empreendimentoId = parseInt(empreendimentoId)
+    }
+
+    // Filtros de relatório (aplicáveis a ambos os papéis)
+    const comoChegou = searchParams.get('comoChegou')
+    const comoSoube = searchParams.get('comoSoube')
+    const periodo = searchParams.get('periodo')
+    if (comoChegou) where.comoChegou = comoChegou
+    if (comoSoube) where.comoSoube = comoSoube
+    if (periodo) {
+      const dataInicio = new Date()
+      dataInicio.setDate(dataInicio.getDate() - parseInt(periodo))
+      where.salvoEm = { gte: dataInicio }
     }
 
     const [visitas, total] = await Promise.all([
