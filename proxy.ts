@@ -16,13 +16,16 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  // Rotas que requerem STAND
-  if (
-    path.startsWith('/visita') ||
-    path.startsWith('/visitas') ||
-    path.startsWith('/dashboard')
-  ) {
+  // Registro de visita: exclusivo de STAND
+  if (path === '/visita' || path.startsWith('/visita/')) {
     if (token?.role !== 'STAND') {
+      return NextResponse.redirect(new URL('/admin/login', req.url))
+    }
+  }
+
+  // Lista de visitas e dashboard: STAND (do seu empreendimento) ou ADMIN (visão global)
+  if (path.startsWith('/visitas') || path.startsWith('/dashboard')) {
+    if (!token) {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
   }

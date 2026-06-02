@@ -121,6 +121,12 @@ export default function NovoEmpreendimentoPage() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="mb-8">
+            <Link
+              href="/admin"
+              className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-medium mb-4"
+            >
+              ← Voltar
+            </Link>
             <h1 className="text-3xl font-bold text-gray-900">
               Novo Empreendimento
             </h1>

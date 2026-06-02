@@ -101,12 +101,14 @@ export default function DashboardPage() {
                 <option value="30">Últimos 30 dias</option>
                 <option value="90">Últimos 90 dias</option>
               </select>
-              <Link
-                href="/visita"
-                className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
-              >
-                + Nova Visita
-              </Link>
+              {session?.user?.role === 'STAND' && (
+                <Link
+                  href="/visita"
+                  className="bg-indigo-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+                >
+                  + Nova Visita
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -258,18 +260,29 @@ export default function DashboardPage() {
 
         {/* Botões de navegação */}
         <div className="flex gap-4">
-          <Link
-            href="/visitas"
-            className="flex-1 text-center bg-white text-indigo-600 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
-          >
-            Ver Todas as Visitas
-          </Link>
-          <Link
-            href="/visita"
-            className="flex-1 text-center bg-white text-indigo-600 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
-          >
-            Registrar Nova Visita
-          </Link>
+          {session?.user?.role === 'ADMIN' ? (
+            <Link
+              href="/admin"
+              className="flex-1 text-center bg-white text-indigo-600 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
+            >
+              ← Voltar ao Painel
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/visitas"
+                className="flex-1 text-center bg-white text-indigo-600 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
+              >
+                Ver Todas as Visitas
+              </Link>
+              <Link
+                href="/visita"
+                className="flex-1 text-center bg-white text-indigo-600 py-3 px-6 rounded-lg font-semibold hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
+              >
+                Registrar Nova Visita
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -253,18 +253,12 @@ export default function VisitaPage() {
         </div>
 
         {/* Botões de navegação */}
-        <div className="mt-6 flex gap-4">
+        <div className="mt-6 flex justify-center">
           <button
             onClick={() => router.push('/visitas')}
-            className="flex-1 bg-white text-indigo-600 py-4 px-6 rounded-lg font-semibold text-lg hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
+            className="bg-white text-indigo-600 py-2 px-5 rounded-lg font-medium text-sm hover:bg-gray-50 border border-indigo-600 transition-colors"
           >
             Ver Visitas
-          </button>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="flex-1 bg-white text-indigo-600 py-4 px-6 rounded-lg font-semibold text-lg hover:bg-gray-50 border-2 border-indigo-600 transition-colors"
-          >
-            Dashboard
           </button>
         </div>
       </div>
