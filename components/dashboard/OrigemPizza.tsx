@@ -30,24 +30,49 @@ export default function OrigemPizza({ data }: { data: Item[] }) {
   }
 
   return (
-    <div className="max-w-sm mx-auto">
-      <Doughnut
-        data={chartData}
-        options={{
-          plugins: {
-            legend: { position: 'bottom', labels: { boxWidth: 12 } },
-            tooltip: {
-              callbacks: {
-                label: (ctx) => {
-                  const v = ctx.parsed as number
-                  const pct = Math.round((v / total) * 100)
-                  return `${ctx.label}: ${v} (${pct}%)`
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+      <div className="max-w-[260px] mx-auto w-full">
+        <Doughnut
+          data={chartData}
+          options={{
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: (ctx) => {
+                    const v = ctx.parsed as number
+                    const pct = Math.round((v / total) * 100)
+                    return `${ctx.label}: ${v} (${pct}%)`
+                  },
                 },
               },
             },
-          },
-        }}
-      />
+          }}
+        />
+      </div>
+
+      <ul className="space-y-1">
+        {ordenado.map((item, idx) => {
+          const pct = Math.round((item._count / total) * 100)
+          return (
+            <li
+              key={item.comoSoube}
+              className="flex items-center justify-between text-sm"
+            >
+              <span className="flex items-center gap-2 text-gray-700">
+                <span
+                  className="inline-block w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: PALETA[idx % PALETA.length] }}
+                />
+                {traduzirComoSoube(item.comoSoube)}
+              </span>
+              <span className="font-medium text-gray-900">
+                {item._count} <span className="text-gray-400">({pct}%)</span>
+              </span>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }
