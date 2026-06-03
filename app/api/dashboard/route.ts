@@ -61,56 +61,49 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const [
-      totalVisitas,
-      totalAnterior,
-      visitasPorComoChegou,
-      visitasPorComoSoube,
-      topCorretores,
-      topImobiliarias,
-      gruposEmpreendimento,
-    ] = await Promise.all([
-      prisma.visita.count({ where }),
-      wherePeriodoAnterior
-        ? prisma.visita.count({ where: wherePeriodoAnterior })
-        : Promise.resolve(0),
+    // Queries em sequência (não em paralelo) para reduzir a pressão de
+    // conexões/threads no engine do Prisma em ambiente compartilhado.
+    const totalVisitas = await prisma.visita.count({ where })
 
-      prisma.visita.groupBy({
-        by: ['comoChegou'],
-        where,
-        _count: true,
-      }),
+    const totalAnterior = wherePeriodoAnterior
+      ? await prisma.visita.count({ where: wherePeriodoAnterior })
+      : 0
 
-      prisma.visita.groupBy({
-        by: ['comoSoube'],
-        where,
-        _count: true,
-      }),
+    const visitasPorComoChegou = await prisma.visita.groupBy({
+      by: ['comoChegou'],
+      where,
+      _count: true,
+    })
 
-      prisma.visita.groupBy({
-        by: ['corretor'],
-        where,
-        _count: true,
-        orderBy: { _count: { corretor: 'desc' } },
-        take: 10,
-      }),
+    const visitasPorComoSoube = await prisma.visita.groupBy({
+      by: ['comoSoube'],
+      where,
+      _count: true,
+    })
 
-      prisma.visita.groupBy({
-        by: ['imobiliaria'],
-        where,
-        _count: true,
-        orderBy: { _count: { imobiliaria: 'desc' } },
-        take: 10,
-      }),
+    const topCorretores = await prisma.visita.groupBy({
+      by: ['corretor'],
+      where,
+      _count: true,
+      orderBy: { _count: { corretor: 'desc' } },
+      take: 10,
+    })
 
-      // Rank de empreendimentos por nº de visitas no período
-      prisma.visita.groupBy({
-        by: ['empreendimentoId'],
-        where,
-        _count: true,
-        orderBy: { _count: { empreendimentoId: 'desc' } },
-      }),
-    ])
+    const topImobiliarias = await prisma.visita.groupBy({
+      by: ['imobiliaria'],
+      where,
+      _count: true,
+      orderBy: { _count: { imobiliaria: 'desc' } },
+      take: 10,
+    })
+
+    // Rank de empreendimentos por nº de visitas no período
+    const gruposEmpreendimento = await prisma.visita.groupBy({
+      by: ['empreendimentoId'],
+      where,
+      _count: true,
+      orderBy: { _count: { empreendimentoId: 'desc' } },
+    })
 
     // Mapear ids -> nomes para o rank de empreendimentos
     const ids = gruposEmpreendimento.map((g) => g.empreendimentoId)
