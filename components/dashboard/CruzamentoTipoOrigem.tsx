@@ -1,7 +1,8 @@
 'use client'
 
 import { Doughnut } from 'react-chartjs-2'
-import { PALETA } from '@/components/charts/registrarChart'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { PALETA, rotuloFatia } from '@/components/charts/registrarChart'
 import { traduzirComoChegou, traduzirComoSoube } from '@/lib/labels'
 
 interface Item {
@@ -51,8 +52,16 @@ export default function CruzamentoTipoOrigem({ data }: { data: Item[] }) {
               <div className="max-w-[180px] mx-auto w-full">
                 <Doughnut
                   data={chartData}
+                  plugins={[ChartDataLabels]}
                   options={{
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                      legend: { display: false },
+                      datalabels: {
+                        color: '#fff',
+                        font: { size: 10, weight: 'bold' },
+                        formatter: rotuloFatia,
+                      },
+                    },
                   }}
                 />
               </div>

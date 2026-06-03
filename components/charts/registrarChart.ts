@@ -43,3 +43,14 @@ export const PALETA = [
 ]
 
 export const cor = (i: number) => PALETA[i % PALETA.length]
+
+// Rótulo "valor (%)" para fatias de rosca/pizza (datalabels).
+// Esconde fatias muito pequenas (<5%) para não sobrepor.
+export const rotuloFatia = (value: number, ctx: any): string | null => {
+  const arr = (ctx.chart.data.datasets[0].data as number[]) || []
+  const total = arr.reduce((a, b) => a + (Number(b) || 0), 0)
+  if (!value || !total) return null
+  const pct = Math.round((value / total) * 100)
+  if (pct < 5) return null
+  return `${value} (${pct}%)`
+}

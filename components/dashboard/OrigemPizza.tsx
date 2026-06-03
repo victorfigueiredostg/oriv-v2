@@ -1,7 +1,8 @@
 'use client'
 
 import { Doughnut } from 'react-chartjs-2'
-import { PALETA } from '@/components/charts/registrarChart'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+import { PALETA, rotuloFatia } from '@/components/charts/registrarChart'
 import { traduzirComoSoube } from '@/lib/labels'
 
 interface Item {
@@ -34,9 +35,15 @@ export default function OrigemPizza({ data }: { data: Item[] }) {
       <div className="max-w-[260px] mx-auto w-full">
         <Doughnut
           data={chartData}
+          plugins={[ChartDataLabels]}
           options={{
             plugins: {
               legend: { display: false },
+              datalabels: {
+                color: '#fff',
+                font: { size: 11, weight: 'bold' },
+                formatter: rotuloFatia,
+              },
               tooltip: {
                 callbacks: {
                   label: (ctx) => {
