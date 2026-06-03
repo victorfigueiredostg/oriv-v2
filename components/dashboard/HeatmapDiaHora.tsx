@@ -56,7 +56,7 @@ export default function HeatmapDiaHora({ matriz, totaisDia }: Props) {
         <p className="text-sm text-gray-600 mb-2">
           Clique num dia da semana para ver a distribuição por hora daquele dia.
         </p>
-        <div className="max-w-xl h-44">
+        <div className="max-w-xl h-[230px]">
           <Bar
             data={dadosDias}
             options={{
@@ -92,7 +92,7 @@ export default function HeatmapDiaHora({ matriz, totaisDia }: Props) {
             </button>
           )}
         </div>
-        <div className="max-w-xl h-80">
+        <div className="max-w-xl h-[416px]">
           <Bar
             data={dadosHoras}
             options={{
