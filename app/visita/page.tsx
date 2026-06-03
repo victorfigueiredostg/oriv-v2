@@ -142,7 +142,7 @@ export default function VisitaPage() {
                 htmlFor="comoChegou"
                 className="block text-lg font-medium text-gray-700 mb-2"
               >
-                Como chegou no Stand? *
+                Tipo de Visita *
               </label>
               <select
                 id="comoChegou"

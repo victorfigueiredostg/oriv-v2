@@ -119,6 +119,63 @@ export async function GET(request: NextRequest) {
       total: g._count,
     }))
 
+    // Cruzamento Tipo de Visita (comoChegou) x Origem (comoSoube)
+    const crossTipoOrigem = await prisma.visita.groupBy({
+      by: ['comoChegou', 'comoSoube'],
+      where,
+      _count: true,
+    })
+
+    // Série temporal (por dia) e matriz dia-da-semana x hora — agregadas em JS
+    // no fuso de Brasília (America/Sao_Paulo), a partir dos salvoEm filtrados.
+    const linhas = await prisma.visita.findMany({
+      where,
+      select: { salvoEm: true },
+    })
+
+    const fmtData = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    })
+    const fmtDiaHora = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/Sao_Paulo',
+      weekday: 'short',
+      hour: '2-digit',
+      hourCycle: 'h23',
+    })
+    const idxDia: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    }
+
+    const serieMap = new Map<string, number>()
+    const matriz = Array.from({ length: 7 }, () => new Array<number>(24).fill(0))
+    const totaisDia = new Array<number>(7).fill(0)
+
+    for (const { salvoEm } of linhas) {
+      const dia = fmtData.format(salvoEm) // YYYY-MM-DD
+      serieMap.set(dia, (serieMap.get(dia) || 0) + 1)
+
+      const parts = fmtDiaHora.formatToParts(salvoEm)
+      const wd = parts.find((p) => p.type === 'weekday')?.value || 'Sun'
+      const hr = parts.find((p) => p.type === 'hour')?.value || '0'
+      const di = idxDia[wd] ?? 0
+      const h = parseInt(hr, 10) % 24
+      matriz[di][h]++
+      totaisDia[di]++
+    }
+
+    const serieTemporal = [...serieMap.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([dia, total]) => ({ dia, total }))
+
     // Indicador de crescimento vs período anterior
     const percentual =
       totalAnterior === 0
@@ -139,6 +196,9 @@ export async function GET(request: NextRequest) {
       topCorretores,
       topImobiliarias,
       rankEmpreendimentos,
+      crossTipoOrigem,
+      serieTemporal,
+      matrizDiaHora: { matriz, totaisDia },
     })
   } catch (error) {
     console.error('Erro ao buscar dashboard:', error)

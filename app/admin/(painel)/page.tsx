@@ -6,29 +6,33 @@ import FiltrosVisitas, {
   FiltrosVisitasValue,
   filtrosParaQuery,
 } from '@/components/FiltrosVisitas'
-import { traduzirComoChegou, traduzirComoSoube } from '@/lib/labels'
+import '@/components/charts/registrarChart'
+import OrigemPizza from '@/components/dashboard/OrigemPizza'
+import CruzamentoTipoOrigem from '@/components/dashboard/CruzamentoTipoOrigem'
+import TendenciaTemporal from '@/components/dashboard/TendenciaTemporal'
+import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
 
 interface DashboardData {
   totalVisitas: number
   crescimento: { atual: number; anterior: number; percentual: number }
-  visitasPorComoChegou: { comoChegou: string; _count: number }[]
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
   topCorretores: { corretor: string; _count: number }[]
   topImobiliarias: { imobiliaria: string; _count: number }[]
   rankEmpreendimentos: { nome: string; total: number }[]
+  crossTipoOrigem: { comoChegou: string; comoSoube: string; _count: number }[]
+  serieTemporal: { dia: string; total: number }[]
+  matrizDiaHora: { matriz: number[][]; totaisDia: number[] }
 }
 
-// Barra horizontal simples (sem biblioteca de gráficos)
+// Barra horizontal simples para o ranking de empreendimentos
 function Barra({
   label,
   valor,
   max,
-  cor = 'bg-indigo-600',
 }: {
   label: string
   valor: number
   max: number
-  cor?: string
 }) {
   const pct = max > 0 ? (valor / max) * 100 : 0
   return (
@@ -39,7 +43,7 @@ function Barra({
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2.5">
         <div
-          className={`${cor} h-2.5 rounded-full`}
+          className="bg-purple-600 h-2.5 rounded-full"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -67,17 +71,6 @@ export default function DashboardPage() {
     carregar()
   }, [filtros])
 
-  const cresc = data?.crescimento
-  const positivo = (cresc?.percentual ?? 0) >= 0
-
-  const maxSoube = Math.max(
-    1,
-    ...(data?.visitasPorComoSoube.map((i) => i._count) || [0])
-  )
-  const maxChegou = Math.max(
-    1,
-    ...(data?.visitasPorComoChegou.map((i) => i._count) || [0])
-  )
   const maxEmp = Math.max(
     1,
     ...(data?.rankEmpreendimentos.map((i) => i.total) || [0])
@@ -89,87 +82,41 @@ export default function DashboardPage() {
 
       <FiltrosVisitas value={filtros} onChange={setFiltros} />
 
-      {carregando ? (
+      {carregando || !data ? (
         <p className="text-gray-500">Carregando...</p>
       ) : (
         <div className="space-y-6">
-          {/* Indicadores de crescimento */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <p className="text-gray-600 text-sm font-medium">
-                Visitas no período
-              </p>
-              <p className="text-4xl font-bold text-indigo-600 mt-2">
-                {data?.totalVisitas ?? 0}
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <p className="text-gray-600 text-sm font-medium">
-                Período anterior
-              </p>
-              <p className="text-4xl font-bold text-gray-400 mt-2">
-                {cresc?.anterior ?? 0}
-              </p>
-            </div>
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <p className="text-gray-600 text-sm font-medium">Crescimento</p>
-              <p
-                className={`text-4xl font-bold mt-2 ${
-                  positivo ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                {positivo ? '↑' : '↓'} {Math.abs(cresc?.percentual ?? 0)}%
-              </p>
-            </div>
+          {/* Tendência + comparativo de período */}
+          <TendenciaTemporal
+            serie={data.serieTemporal}
+            crescimento={data.crescimento}
+          />
+
+          {/* Origem do lead */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Origem do lead
+            </h2>
+            <OrigemPizza data={data.visitasPorComoSoube} />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Origem do lead */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Origem do lead
-              </h2>
-              <div className="space-y-3">
-                {data?.visitasPorComoSoube
-                  .slice()
-                  .sort((a, b) => b._count - a._count)
-                  .map((item) => (
-                    <Barra
-                      key={item.comoSoube}
-                      label={traduzirComoSoube(item.comoSoube)}
-                      valor={item._count}
-                      max={maxSoube}
-                    />
-                  ))}
-                {(!data || data.visitasPorComoSoube.length === 0) && (
-                  <p className="text-sm text-gray-500">Sem dados no período.</p>
-                )}
-              </div>
-            </div>
+          {/* Cruzamento Tipo de Visita x Origem */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Tipo de Visita × Origem
+            </h2>
+            <CruzamentoTipoOrigem data={data.crossTipoOrigem} />
+          </div>
 
-            {/* Como chegou ao stand */}
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Como chegou ao stand
-              </h2>
-              <div className="space-y-3">
-                {data?.visitasPorComoChegou
-                  .slice()
-                  .sort((a, b) => b._count - a._count)
-                  .map((item) => (
-                    <Barra
-                      key={item.comoChegou}
-                      label={traduzirComoChegou(item.comoChegou)}
-                      valor={item._count}
-                      max={maxChegou}
-                      cor="bg-green-600"
-                    />
-                  ))}
-                {(!data || data.visitasPorComoChegou.length === 0) && (
-                  <p className="text-sm text-gray-500">Sem dados no período.</p>
-                )}
-              </div>
-            </div>
+          {/* Heatmap dia da semana x hora */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Visitas por dia da semana e hora
+            </h2>
+            <HeatmapDiaHora
+              matriz={data.matrizDiaHora.matriz}
+              totaisDia={data.matrizDiaHora.totaisDia}
+            />
           </div>
 
           {/* Rank de empreendimentos */}
@@ -178,16 +125,15 @@ export default function DashboardPage() {
               Empreendimentos com mais visitas
             </h2>
             <div className="space-y-3">
-              {data?.rankEmpreendimentos.map((item, i) => (
+              {data.rankEmpreendimentos.map((item, i) => (
                 <Barra
                   key={item.nome}
                   label={`#${i + 1}  ${item.nome}`}
                   valor={item.total}
                   max={maxEmp}
-                  cor="bg-purple-600"
                 />
               ))}
-              {(!data || data.rankEmpreendimentos.length === 0) && (
+              {data.rankEmpreendimentos.length === 0 && (
                 <p className="text-sm text-gray-500">Sem dados no período.</p>
               )}
             </div>
@@ -200,7 +146,7 @@ export default function DashboardPage() {
                 Top Corretores
               </h2>
               <div className="space-y-2">
-                {data?.topCorretores.map((item, i) => (
+                {data.topCorretores.map((item, i) => (
                   <div
                     key={item.corretor}
                     className="flex justify-between items-center py-2 border-b border-gray-100"
@@ -216,7 +162,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 ))}
-                {(!data || data.topCorretores.length === 0) && (
+                {data.topCorretores.length === 0 && (
                   <p className="text-sm text-gray-500">Sem dados no período.</p>
                 )}
               </div>
@@ -227,7 +173,7 @@ export default function DashboardPage() {
                 Top Imobiliárias
               </h2>
               <div className="space-y-2">
-                {data?.topImobiliarias.map((item, i) => (
+                {data.topImobiliarias.map((item, i) => (
                   <div
                     key={item.imobiliaria}
                     className="flex justify-between items-center py-2 border-b border-gray-100"
@@ -243,7 +189,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                 ))}
-                {(!data || data.topImobiliarias.length === 0) && (
+                {data.topImobiliarias.length === 0 && (
                   <p className="text-sm text-gray-500">Sem dados no período.</p>
                 )}
               </div>

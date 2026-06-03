@@ -85,7 +85,7 @@ export default function RelatoriosPage() {
                       'Cliente',
                       'Corretor',
                       'Imobiliária',
-                      'Como Chegou',
+                      'Tipo de Visita',
                       'Origem',
                     ].map((h) => (
                       <th

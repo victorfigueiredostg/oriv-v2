@@ -107,7 +107,7 @@ export default function FiltrosVisitas({ value, onChange }: Props) {
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Como chegou
+          Tipo de Visita
         </label>
         <select
           value={value.comoChegou}
