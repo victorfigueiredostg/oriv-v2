@@ -2,6 +2,16 @@
 
 import { useState } from 'react'
 import { Bar } from 'react-chartjs-2'
+import ChartDataLabels from 'chartjs-plugin-datalabels'
+
+// Rótulo "valor (%)" calculado sobre o total do dataset atual
+const rotuloQtdPct = (value: number, ctx: any) => {
+  if (!value) return null
+  const arr = (ctx.chart.data.datasets[0].data as number[]) || []
+  const total = arr.reduce((a, b) => a + (Number(b) || 0), 0)
+  const pct = total ? Math.round((value / total) * 100) : 0
+  return `${value} (${pct}%)`
+}
 
 const DIAS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb']
 
@@ -59,11 +69,23 @@ export default function HeatmapDiaHora({ matriz, totaisDia }: Props) {
         <div className="max-w-xl h-[230px]">
           <Bar
             data={dadosDias}
+            plugins={[ChartDataLabels]}
             options={{
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'end',
+                  color: '#374151',
+                  font: { size: 10, weight: 'bold' },
+                  formatter: rotuloQtdPct,
+                },
+              },
+              scales: {
+                y: { beginAtZero: true, ticks: { precision: 0 }, grace: '18%' },
+              },
               onClick: (_evt, elements) => {
                 if (elements.length > 0) {
                   const idx = elements[0].index
@@ -95,12 +117,24 @@ export default function HeatmapDiaHora({ matriz, totaisDia }: Props) {
         <div className="max-w-xl h-[416px]">
           <Bar
             data={dadosHoras}
+            plugins={[ChartDataLabels]}
             options={{
               indexAxis: 'y' as const,
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { x: { beginAtZero: true, ticks: { precision: 0 } } },
+              plugins: {
+                legend: { display: false },
+                datalabels: {
+                  anchor: 'end',
+                  align: 'right',
+                  color: '#374151',
+                  font: { size: 10, weight: 'bold' },
+                  formatter: rotuloQtdPct,
+                },
+              },
+              scales: {
+                x: { beginAtZero: true, ticks: { precision: 0 }, grace: '15%' },
+              },
             }}
           />
         </div>
