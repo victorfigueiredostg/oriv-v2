@@ -56,19 +56,23 @@ export default function HeatmapDiaHora({ matriz, totaisDia }: Props) {
         <p className="text-sm text-gray-600 mb-2">
           Clique num dia da semana para ver a distribuição por hora daquele dia.
         </p>
-        <Bar
-          data={dadosDias}
-          options={{
-            plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
-            onClick: (_evt, elements) => {
-              if (elements.length > 0) {
-                const idx = elements[0].index
-                setDiaSelecionado((atual) => (atual === idx ? null : idx))
-              }
-            },
-          }}
-        />
+        <div className="max-w-xl h-44">
+          <Bar
+            data={dadosDias}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+              onClick: (_evt, elements) => {
+                if (elements.length > 0) {
+                  const idx = elements[0].index
+                  setDiaSelecionado((atual) => (atual === idx ? null : idx))
+                }
+              },
+            }}
+          />
+        </div>
       </div>
 
       <div>
@@ -88,15 +92,18 @@ export default function HeatmapDiaHora({ matriz, totaisDia }: Props) {
             </button>
           )}
         </div>
-        <Bar
-          data={dadosHoras}
-          options={{
-            indexAxis: 'y' as const,
-            plugins: { legend: { display: false } },
-            scales: { x: { beginAtZero: true, ticks: { precision: 0 } } },
-          }}
-          height={420}
-        />
+        <div className="max-w-xl h-80">
+          <Bar
+            data={dadosHoras}
+            options={{
+              indexAxis: 'y' as const,
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { x: { beginAtZero: true, ticks: { precision: 0 } } },
+            }}
+          />
+        </div>
       </div>
     </div>
   )
