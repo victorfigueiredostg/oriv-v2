@@ -1,13 +1,19 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from '../generated/prisma/client'
+import { PrismaMariaDb } from '@prisma/adapter-mariadb'
 
-// Em hospedagem compartilhada (Hostinger) o engine do Prisma pode entrar em
-// "PANIC: timer has gone away" quando abre muitas conexões/threads e bate no
-// limite de processos do ambiente. Por isso limitamos o pool de conexões.
-function urlComLimite(): string | undefined {
-  const url = process.env.DATABASE_URL
-  if (!url || url.includes('connection_limit')) return url
-  const sep = url.includes('?') ? '&' : '?'
-  return `${url}${sep}connection_limit=3&pool_timeout=30`
+// Prisma 7 sem motor Rust: o cliente fala com o MySQL via driver adapter
+// (mariadb, compatível com MySQL). Isso evita o "PANIC: timer has gone away"
+// do engine Rust no ambiente compartilhado da Hostinger.
+function configAdapter() {
+  const url = new URL(process.env.DATABASE_URL ?? '')
+  return {
+    host: url.hostname,
+    port: url.port ? parseInt(url.port, 10) : 3306,
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    database: url.pathname.replace(/^\//, ''),
+    connectionLimit: 3,
+  }
 }
 
 const globalForPrisma = globalThis as unknown as {
@@ -16,8 +22,6 @@ const globalForPrisma = globalThis as unknown as {
 
 export const prisma =
   globalForPrisma.prisma ??
-  new PrismaClient({
-    datasources: { db: { url: urlComLimite() } },
-  })
+  new PrismaClient({ adapter: new PrismaMariaDb(configAdapter()) })
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
