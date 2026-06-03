@@ -52,6 +52,12 @@ model Visita {
   @@index([comoSoube])
 }
 
+model Imobiliaria {
+  id       Int      @id @default(autoincrement())
+  nome     String   @unique
+  criadoEm DateTime @default(now())
+}
+
 enum Role {
   ADMIN
   STAND

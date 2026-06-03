@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import ImobiliariaInput from '@/components/ImobiliariaInput'
 
 export default function VisitaPage() {
   const { data: session, status } = useSession()
@@ -185,15 +186,15 @@ export default function VisitaPage() {
               >
                 Imobiliária *
               </label>
-              <input
-                type="text"
+              <ImobiliariaInput
                 id="imobiliaria"
-                name="imobiliaria"
                 value={formData.imobiliaria}
-                onChange={handleChange}
+                onChange={(v) =>
+                  setFormData((prev) => ({ ...prev, imobiliaria: v }))
+                }
                 required
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Nome da imobiliária"
+                placeholder="Pesquisar ou digitar a imobiliária"
               />
             </div>
 
