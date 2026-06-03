@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import FiltrosVisitas, {
-  FILTROS_PADRAO,
+  filtrosPadrao,
   FiltrosVisitasValue,
   filtrosParaQuery,
 } from '@/components/FiltrosVisitas'
@@ -24,7 +24,7 @@ interface Visita {
 }
 
 export default function RelatoriosPage() {
-  const [filtros, setFiltros] = useState<FiltrosVisitasValue>(FILTROS_PADRAO)
+  const [filtros, setFiltros] = useState<FiltrosVisitasValue>(filtrosPadrao)
   const [visitas, setVisitas] = useState<Visita[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)

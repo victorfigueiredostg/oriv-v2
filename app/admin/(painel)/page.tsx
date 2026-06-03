@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import FiltrosVisitas, {
-  FILTROS_PADRAO,
+  filtrosPadrao,
   FiltrosVisitasValue,
   filtrosParaQuery,
 } from '@/components/FiltrosVisitas'
@@ -48,7 +48,7 @@ function Barra({
 }
 
 export default function DashboardPage() {
-  const [filtros, setFiltros] = useState<FiltrosVisitasValue>(FILTROS_PADRAO)
+  const [filtros, setFiltros] = useState<FiltrosVisitasValue>(filtrosPadrao)
   const [data, setData] = useState<DashboardData | null>(null)
   const [carregando, setCarregando] = useState(true)
 

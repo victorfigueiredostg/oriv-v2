@@ -101,13 +101,14 @@ export async function GET(request: NextRequest) {
     // Filtros de relatório (aplicáveis a ambos os papéis)
     const comoChegou = searchParams.get('comoChegou')
     const comoSoube = searchParams.get('comoSoube')
-    const periodo = searchParams.get('periodo')
+    const dataInicioStr = searchParams.get('dataInicio')
+    const dataFimStr = searchParams.get('dataFim')
     if (comoChegou) where.comoChegou = comoChegou
     if (comoSoube) where.comoSoube = comoSoube
-    if (periodo) {
-      const dataInicio = new Date()
-      dataInicio.setDate(dataInicio.getDate() - parseInt(periodo))
-      where.salvoEm = { gte: dataInicio }
+    if (dataInicioStr || dataFimStr) {
+      where.salvoEm = {}
+      if (dataInicioStr) where.salvoEm.gte = new Date(`${dataInicioStr}T00:00:00`)
+      if (dataFimStr) where.salvoEm.lte = new Date(`${dataFimStr}T23:59:59.999`)
     }
 
     const [visitas, total] = await Promise.all([

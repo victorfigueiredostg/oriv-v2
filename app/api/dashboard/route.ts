@@ -12,17 +12,22 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url)
-    const periodo = parseInt(searchParams.get('periodo') || '30') // dias
     const comoChegou = searchParams.get('comoChegou') || undefined
     const comoSoube = searchParams.get('comoSoube') || undefined
     const empreendimentoIdParam = searchParams.get('empreendimentoId')
+    const dataInicioStr = searchParams.get('dataInicio')
+    const dataFimStr = searchParams.get('dataFim')
 
-    const agora = new Date()
-    const dataInicio = new Date(agora)
-    dataInicio.setDate(dataInicio.getDate() - periodo)
-    // Período imediatamente anterior, de mesma duração (para crescimento)
-    const dataInicioAnterior = new Date(agora)
-    dataInicioAnterior.setDate(dataInicioAnterior.getDate() - periodo * 2)
+    let inicio = dataInicioStr ? new Date(`${dataInicioStr}T00:00:00`) : null
+    let fim = dataFimStr ? new Date(`${dataFimStr}T23:59:59.999`) : null
+
+    // Compatibilidade: a tela do stand ainda usa ?periodo=N (últimos N dias)
+    const periodoParam = searchParams.get('periodo')
+    if (!inicio && !fim && periodoParam) {
+      fim = new Date()
+      inicio = new Date()
+      inicio.setDate(inicio.getDate() - parseInt(periodoParam))
+    }
 
     // Filtros comuns (sem a janela de data)
     const filtrosBase: any = {}
@@ -36,10 +41,24 @@ export async function GET(request: NextRequest) {
       filtrosBase.empreendimentoId = parseInt(empreendimentoIdParam)
     }
 
-    const where = { ...filtrosBase, salvoEm: { gte: dataInicio } }
-    const wherePeriodoAnterior = {
+    // Janela de datas do período atual
+    const rangeAtual: any = {}
+    if (inicio) rangeAtual.gte = inicio
+    if (fim) rangeAtual.lte = fim
+    const where = {
       ...filtrosBase,
-      salvoEm: { gte: dataInicioAnterior, lt: dataInicio },
+      ...(inicio || fim ? { salvoEm: rangeAtual } : {}),
+    }
+
+    // Período imediatamente anterior, de mesma duração (para o crescimento)
+    let wherePeriodoAnterior: any = null
+    if (inicio && fim) {
+      const duracao = fim.getTime() - inicio.getTime()
+      const inicioAnterior = new Date(inicio.getTime() - duracao)
+      wherePeriodoAnterior = {
+        ...filtrosBase,
+        salvoEm: { gte: inicioAnterior, lt: inicio },
+      }
     }
 
     const [
@@ -52,7 +71,9 @@ export async function GET(request: NextRequest) {
       gruposEmpreendimento,
     ] = await Promise.all([
       prisma.visita.count({ where }),
-      prisma.visita.count({ where: wherePeriodoAnterior }),
+      wherePeriodoAnterior
+        ? prisma.visita.count({ where: wherePeriodoAnterior })
+        : Promise.resolve(0),
 
       prisma.visita.groupBy({
         by: ['comoChegou'],
