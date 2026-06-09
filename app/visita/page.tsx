@@ -12,6 +12,7 @@ export default function VisitaPage() {
 
   const [formData, setFormData] = useState({
     nomeCliente: '',
+    telefone: '',
     idadeCliente: '',
     comoChegou: '',
     corretor: '',
@@ -22,6 +23,37 @@ export default function VisitaPage() {
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
   const [sucesso, setSucesso] = useState(false)
+  const [cvResultado, setCvResultado] = useState<any>(null)
+  const [verificandoCv, setVerificandoCv] = useState(false)
+
+  const verificarCv = async () => {
+    setCvResultado(null)
+    if (!formData.telefone.trim()) {
+      setCvResultado({ erro: 'Informe o telefone para verificar.' })
+      return
+    }
+    setVerificandoCv(true)
+    try {
+      const res = await fetch('/api/cv/validar-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome: formData.nomeCliente,
+          telefone: formData.telefone,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCvResultado({ erro: data.message || 'Erro ao consultar o CV.' })
+        return
+      }
+      setCvResultado(data)
+    } catch {
+      setCvResultado({ erro: 'Falha ao consultar o CV.' })
+    } finally {
+      setVerificandoCv(false)
+    }
+  }
 
   // Redirect se não estiver autenticado
   if (status === 'loading') {
@@ -64,12 +96,14 @@ export default function VisitaPage() {
       // Sucesso - limpar formulário
       setFormData({
         nomeCliente: '',
+        telefone: '',
         idadeCliente: '',
         comoChegou: '',
         corretor: '',
         imobiliaria: '',
         comoSoube: '',
       })
+      setCvResultado(null)
       setSucesso(true)
 
       // Remover mensagem de sucesso após 3s
@@ -159,6 +193,63 @@ export default function VisitaPage() {
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Idade em anos"
               />
+            </div>
+
+            {/* Telefone (opcional) + verificação no CVCRM */}
+            <div>
+              <label
+                htmlFor="telefone"
+                className="block text-lg font-medium text-gray-700 mb-2"
+              >
+                Telefone
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="tel"
+                  id="telefone"
+                  name="telefone"
+                  value={formData.telefone}
+                  onChange={handleChange}
+                  inputMode="tel"
+                  className="flex-1 px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="(DDD) número"
+                />
+                <button
+                  type="button"
+                  onClick={verificarCv}
+                  disabled={verificandoCv}
+                  className="px-5 py-4 bg-white text-indigo-600 border-2 border-indigo-600 rounded-lg font-semibold hover:bg-indigo-50 disabled:opacity-50 whitespace-nowrap"
+                >
+                  {verificandoCv ? 'Verificando...' : 'Verificar no CV'}
+                </button>
+              </div>
+
+              {cvResultado &&
+                (cvResultado.erro ? (
+                  <p className="mt-2 text-sm bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-2">
+                    {cvResultado.erro}
+                  </p>
+                ) : !cvResultado.encontrado ? (
+                  <p className="mt-2 text-sm bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg px-4 py-2">
+                    Nenhum lead com esse telefone no CV — provável lead novo.
+                  </p>
+                ) : cvResultado.nomeConfere ? (
+                  <p className="mt-2 text-sm bg-green-50 border border-green-200 text-green-800 rounded-lg px-4 py-2">
+                    ✓ Já cadastrado no CV — nome confere
+                    {cvResultado.leads?.[0]?.nome
+                      ? ` (${cvResultado.leads[0].nome})`
+                      : ''}
+                    .
+                  </p>
+                ) : (
+                  <p className="mt-2 text-sm bg-orange-50 border border-orange-200 text-orange-800 rounded-lg px-4 py-2">
+                    ⚠ Telefone já existe no CV, mas com outro nome
+                    {cvResultado.leads?.[0]?.nome
+                      ? `: ${cvResultado.leads[0].nome}`
+                      : ''}
+                    .
+                  </p>
+                ))}
             </div>
 
             {/* Como chegou no Stand */}

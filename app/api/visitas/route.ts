@@ -6,6 +6,7 @@ import { z } from 'zod'
 
 const visitaSchema = z.object({
   nomeCliente: z.string().min(1, 'Nome do cliente é obrigatório'),
+  telefone: z.string().trim().optional(),
   idadeCliente: z.coerce
     .number({ message: 'Idade do cliente é obrigatória' })
     .int('Idade deve ser um número inteiro')
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
     const visita = await prisma.visita.create({
       data: {
         ...validatedData,
+        telefone: validatedData.telefone?.trim() || null,
         empreendimentoId: session.user.empreendimentoId,
         usuarioId: parseInt(session.user.id),
       },

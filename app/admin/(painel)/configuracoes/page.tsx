@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import GerenciarImobiliarias from '@/components/GerenciarImobiliarias'
+import ConfigApiCV from '@/components/ConfigApiCV'
 
 interface Empreendimento {
   id: number
@@ -76,6 +77,8 @@ export default function ConfiguracoesPage() {
       </div>
 
       <GerenciarImobiliarias />
+
+      <ConfigApiCV />
 
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">

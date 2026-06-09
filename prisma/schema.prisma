@@ -41,6 +41,7 @@ model Visita {
   usuario          Usuario        @relation(fields: [usuarioId], references: [id])
   nomeCliente      String
   idadeCliente     Int?           // idade do lead em anos; nullable p/ não quebrar registros antigos
+  telefone         String?        // telefone do lead; opcional (usado tb na verificação no CVCRM)
   comoChegou       ComoChegou
   corretor         String
   imobiliaria      String
@@ -57,6 +58,12 @@ model Imobiliaria {
   id       Int      @id @default(autoincrement())
   nome     String   @unique
   criadoEm DateTime @default(now())
+}
+
+// Configurações chave-valor (ex.: credenciais de integração de API)
+model Configuracao {
+  chave String @id
+  valor String
 }
 
 enum Role {
