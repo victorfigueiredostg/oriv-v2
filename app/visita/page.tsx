@@ -195,6 +195,99 @@ export default function VisitaPage() {
               />
             </div>
 
+            {/* Como chegou no Stand */}
+            <div>
+              <label
+                htmlFor="comoChegou"
+                className="block text-lg font-medium text-gray-700 mb-2"
+              >
+                Tipo de Visita *
+              </label>
+              <select
+                id="comoChegou"
+                name="comoChegou"
+                value={formData.comoChegou}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="">Selecione uma opção</option>
+                <option value="AGENDADO_CORRETOR">Agendei com um Corretor</option>
+                <option value="CLIENTE_PASSANTE">Cliente Passante</option>
+              </select>
+            </div>
+
+            {/* Como ficou sabendo */}
+            <div>
+              <label
+                htmlFor="comoSoube"
+                className="block text-lg font-medium text-gray-700 mb-2"
+              >
+                Como ficou sabendo do empreendimento? *
+              </label>
+              <select
+                id="comoSoube"
+                name="comoSoube"
+                value={formData.comoSoube}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              >
+                <option value="">Selecione uma opção</option>
+                <option value="INSTAGRAM">Instagram</option>
+                <option value="FACEBOOK">Facebook</option>
+                <option value="WHATSAPP">WhatsApp</option>
+                <option value="CORRETOR">Corretor</option>
+                <option value="PANFLETO">Panfleto</option>
+                <option value="TV">TV</option>
+                <option value="RADIO">Rádio</option>
+                <option value="STAND_CENTRAL_VENDAS">Stand/Central de Vendas</option>
+                <option value="INDICACAO">Indicação</option>
+                <option value="OUTDOOR">Outdoor</option>
+                <option value="OBRA">Obra</option>
+              </select>
+            </div>
+
+            {/* Corretor */}
+            <div>
+              <label
+                htmlFor="corretor"
+                className="block text-lg font-medium text-gray-700 mb-2"
+              >
+                Corretor *
+              </label>
+              <input
+                type="text"
+                id="corretor"
+                name="corretor"
+                value={formData.corretor}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Nome do corretor"
+              />
+            </div>
+
+            {/* Imobiliária */}
+            <div>
+              <label
+                htmlFor="imobiliaria"
+                className="block text-lg font-medium text-gray-700 mb-2"
+              >
+                Imobiliária *
+              </label>
+              <ImobiliariaInput
+                id="imobiliaria"
+                value={formData.imobiliaria}
+                onChange={(v) =>
+                  setFormData((prev) => ({ ...prev, imobiliaria: v }))
+                }
+                required
+                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Pesquisar ou digitar a imobiliária"
+              />
+            </div>
+
             {/* Telefone (opcional) + verificação no CVCRM */}
             <div>
               <label
@@ -250,99 +343,6 @@ export default function VisitaPage() {
                     .
                   </p>
                 ))}
-            </div>
-
-            {/* Como chegou no Stand */}
-            <div>
-              <label
-                htmlFor="comoChegou"
-                className="block text-lg font-medium text-gray-700 mb-2"
-              >
-                Tipo de Visita *
-              </label>
-              <select
-                id="comoChegou"
-                name="comoChegou"
-                value={formData.comoChegou}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Selecione uma opção</option>
-                <option value="AGENDADO_CORRETOR">Agendei com um Corretor</option>
-                <option value="CLIENTE_PASSANTE">Cliente Passante</option>
-              </select>
-            </div>
-
-            {/* Corretor */}
-            <div>
-              <label
-                htmlFor="corretor"
-                className="block text-lg font-medium text-gray-700 mb-2"
-              >
-                Corretor *
-              </label>
-              <input
-                type="text"
-                id="corretor"
-                name="corretor"
-                value={formData.corretor}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Nome do corretor"
-              />
-            </div>
-
-            {/* Imobiliária */}
-            <div>
-              <label
-                htmlFor="imobiliaria"
-                className="block text-lg font-medium text-gray-700 mb-2"
-              >
-                Imobiliária *
-              </label>
-              <ImobiliariaInput
-                id="imobiliaria"
-                value={formData.imobiliaria}
-                onChange={(v) =>
-                  setFormData((prev) => ({ ...prev, imobiliaria: v }))
-                }
-                required
-                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Pesquisar ou digitar a imobiliária"
-              />
-            </div>
-
-            {/* Como ficou sabendo */}
-            <div>
-              <label
-                htmlFor="comoSoube"
-                className="block text-lg font-medium text-gray-700 mb-2"
-              >
-                Como ficou sabendo do empreendimento? *
-              </label>
-              <select
-                id="comoSoube"
-                name="comoSoube"
-                value={formData.comoSoube}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              >
-                <option value="">Selecione uma opção</option>
-                <option value="INSTAGRAM">Instagram</option>
-                <option value="FACEBOOK">Facebook</option>
-                <option value="WHATSAPP">WhatsApp</option>
-                <option value="CORRETOR">Corretor</option>
-                <option value="PANFLETO">Panfleto</option>
-                <option value="TV">TV</option>
-                <option value="RADIO">Rádio</option>
-                <option value="STAND_CENTRAL_VENDAS">Stand/Central de Vendas</option>
-                <option value="INDICACAO">Indicação</option>
-                <option value="OUTDOOR">Outdoor</option>
-                <option value="OBRA">Obra</option>
-              </select>
             </div>
 
             {/* Mensagens de feedback */}
