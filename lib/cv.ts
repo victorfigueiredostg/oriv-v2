@@ -92,3 +92,11 @@ export function normalizar(s: string): string {
 }
 
 export const apenasDigitos = (s: string) => (s || '').replace(/\D/g, '')
+
+// Reduz um telefone aos dígitos locais (DDD + número), removendo o código do
+// país (+55). Usado para comparar telefone EXATO (a busca do CV é por "contém").
+export function telefoneLocal(s: string): string {
+  let d = apenasDigitos(s)
+  if (d.length >= 12 && d.startsWith('55')) d = d.slice(2)
+  return d
+}

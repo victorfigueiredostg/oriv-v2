@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { buscarLeadsPorTelefone, normalizar, apenasDigitos } from '@/lib/cv'
+import {
+  buscarLeadsPorTelefone,
+  normalizar,
+  apenasDigitos,
+  telefoneLocal,
+} from '@/lib/cv'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -20,28 +25,32 @@ export async function POST(request: NextRequest) {
 
     const { nome, telefone } = schema.parse(await request.json())
     const digits = apenasDigitos(telefone)
-    if (digits.length < 8) {
+    if (digits.length < 10) {
       return NextResponse.json(
-        { message: 'Informe um telefone válido (com DDD).' },
+        { message: 'Informe o telefone completo com DDD.' },
         { status: 400 }
       )
     }
 
-    const { total, leads } = await buscarLeadsPorTelefone(digits)
+    // O CV busca por "contém"; aqui exigimos telefone EXATO (DDD + número),
+    // garantindo que o match seja realmente de um lead com aquele telefone.
+    const alvo = telefoneLocal(telefone)
+    const { leads } = await buscarLeadsPorTelefone(digits)
+    const exatos = leads.filter((l) => telefoneLocal(l.telefone || '') === alvo)
 
     const nomeNorm = normalizar(nome || '')
     const nomeConfere =
       !!nomeNorm &&
-      leads.some((l) => {
+      exatos.some((l) => {
         const ln = normalizar(l.nome || '')
         return ln === nomeNorm || ln.includes(nomeNorm) || nomeNorm.includes(ln)
       })
 
     return NextResponse.json({
-      encontrado: leads.length > 0,
-      total,
+      encontrado: exatos.length > 0,
+      total: exatos.length,
       nomeConfere,
-      leads: leads.slice(0, 5).map((l) => ({
+      leads: exatos.slice(0, 5).map((l) => ({
         idlead: l.idlead,
         nome: l.nome,
         telefone: l.telefone,
