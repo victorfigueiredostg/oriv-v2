@@ -4,88 +4,115 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import {
+  traduzirComoChegou,
+  traduzirComoSoube,
+  formatarDataHora,
+} from '@/lib/labels'
 
 interface Visita {
   id: number
   nomeCliente: string
-  comoChegou: string
   corretor: string
   imobiliaria: string
+  comoChegou: string
   comoSoube: string
+  cvStatus: string | null
+  cvConfirmadoEm: string | null
   salvoEm: string
   usuario: { usuario: string }
   empreendimento: { nome: string }
 }
 
+function BadgeCv({ status }: { status: string | null }) {
+  const map: Record<string, { txt: string; cls: string }> = {
+    CADASTRADO: { txt: 'Cadastrado', cls: 'bg-green-100 text-green-700' },
+    NAO_CADASTRADO: { txt: 'Não cadastrado', cls: 'bg-red-100 text-red-700' },
+    NAO_PREENCHEU: { txt: 'Não preencheu', cls: 'bg-gray-200 text-gray-600' },
+  }
+  const item = status ? map[status] : null
+  if (!item) {
+    return <span className="text-gray-400 text-xs">não verificado</span>
+  }
+  return (
+    <span
+      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${item.cls}`}
+    >
+      {item.txt}
+    </span>
+  )
+}
+
 export default function VisitasPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const isAdmin = session?.user?.role === 'ADMIN'
+
   const [visitas, setVisitas] = useState<Visita[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [carregando, setCarregando] = useState(true)
+  const [dataInicio, setDataInicio] = useState('')
+  const [dataFim, setDataFim] = useState('')
+  const [confirmando, setConfirmando] = useState<number | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
-      return
     }
+  }, [status, router])
 
-    if (status === 'authenticated') {
-      carregarVisitas()
+  useEffect(() => {
+    if (status !== 'authenticated') return
+    const carregar = async () => {
+      setCarregando(true)
+      try {
+        const p = new URLSearchParams({ page: String(page), limit: '20' })
+        if (dataInicio) p.set('dataInicio', dataInicio)
+        if (dataFim) p.set('dataFim', dataFim)
+        const response = await fetch(`/api/visitas?${p.toString()}`)
+        const data = await response.json()
+        setVisitas(data.visitas || [])
+        setTotalPages(data.pagination?.totalPages || 1)
+      } catch (error) {
+        console.error('Erro ao carregar visitas:', error)
+      } finally {
+        setCarregando(false)
+      }
     }
-  }, [status, page])
+    carregar()
+  }, [status, page, dataInicio, dataFim])
 
-  const carregarVisitas = async () => {
-    setCarregando(true)
+  const mudarData = (campo: 'inicio' | 'fim', valor: string) => {
+    setPage(1)
+    if (campo === 'inicio') setDataInicio(valor)
+    else setDataFim(valor)
+  }
+
+  const confirmar = async (id: number) => {
+    setConfirmando(id)
     try {
-      const response = await fetch(`/api/visitas?page=${page}&limit=20`)
-      const data = await response.json()
-      setVisitas(data.visitas)
-      setTotalPages(data.pagination.totalPages)
-    } catch (error) {
-      console.error('Erro ao carregar visitas:', error)
+      const res = await fetch(`/api/visitas/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmar: true }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setVisitas((prev) =>
+          prev.map((v) =>
+            v.id === id ? { ...v, cvConfirmadoEm: data.cvConfirmadoEm } : v
+          )
+        )
+      }
+    } catch {
+      alert('Não foi possível confirmar.')
     } finally {
-      setCarregando(false)
+      setConfirmando(null)
     }
   }
 
-  const formatarData = (data: string) => {
-    return new Date(data).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const traduzirComoChegou = (valor: string) => {
-    const traducoes: Record<string, string> = {
-      AGENDADO_CORRETOR: 'Agendado com Corretor',
-      CLIENTE_PASSANTE: 'Cliente Passante',
-    }
-    return traducoes[valor] || valor
-  }
-
-  const traduzirComoSoube = (valor: string) => {
-    const traducoes: Record<string, string> = {
-      INSTAGRAM: 'Instagram',
-      FACEBOOK: 'Facebook',
-      WHATSAPP: 'WhatsApp',
-      CORRETOR: 'Corretor',
-      PANFLETO: 'Panfleto',
-      TV: 'TV',
-      RADIO: 'Rádio',
-      STAND_CENTRAL_VENDAS: 'Stand/Central de Vendas',
-      INDICACAO: 'Indicação',
-      OUTDOOR: 'Outdoor',
-      OBRA: 'Obra',
-    }
-    return traducoes[valor] || valor
-  }
-
-  if (status === 'loading' || carregando) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-xl">Carregando...</div>
@@ -109,17 +136,53 @@ export default function VisitasPage() {
             </Link>
           </div>
 
-          {visitas.length === 0 ? (
+          {/* Filtro de data */}
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Data início
+              </label>
+              <input
+                type="date"
+                value={dataInicio}
+                max={dataFim || undefined}
+                onChange={(e) => mudarData('inicio', e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Data fim
+              </label>
+              <input
+                type="date"
+                value={dataFim}
+                min={dataInicio || undefined}
+                onChange={(e) => mudarData('fim', e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-gray-900"
+              />
+            </div>
+            {(dataInicio || dataFim) && (
+              <button
+                onClick={() => {
+                  setPage(1)
+                  setDataInicio('')
+                  setDataFim('')
+                }}
+                className="self-end text-sm text-indigo-600 hover:text-indigo-700 font-medium pb-2"
+              >
+                Limpar
+              </button>
+            )}
+          </div>
+
+          {carregando ? (
+            <p className="text-gray-500 py-8 text-center">Carregando...</p>
+          ) : visitas.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 text-lg">
-                Nenhuma visita registrada ainda.
+                Nenhuma visita encontrada.
               </p>
-              <Link
-                href="/visita"
-                className="inline-block mt-4 text-indigo-600 hover:text-indigo-700 font-medium"
-              >
-                Registrar primeira visita →
-              </Link>
             </div>
           ) : (
             <>
@@ -127,67 +190,80 @@ export default function VisitasPage() {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b-2 border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Data/Hora
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Cliente
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Corretor
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Imobiliária
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Como Chegou
-                      </th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                        Como Soube
-                      </th>
-                      {session?.user?.role === 'ADMIN' && (
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">
-                          Empreendimento
+                      {[
+                        'Data/Hora',
+                        'Cliente',
+                        'Corretor',
+                        'Imobiliária',
+                        'Tipo de Visita',
+                        'Origem',
+                        ...(isAdmin ? ['Empreendimento'] : []),
+                        'CV',
+                        'Confirmação',
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap"
+                        >
+                          {h}
                         </th>
-                      )}
+                      ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {visitas.map((visita) => (
-                      <tr
-                        key={visita.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-4 py-3 text-sm text-gray-900">
-                          {formatarData(visita.salvoEm)}
+                    {visitas.map((v) => (
+                      <tr key={v.id} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
+                          {formatarDataHora(v.salvoEm)}
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                          {visita.nomeCliente}
+                          {v.nomeCliente}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700">
-                          {visita.corretor}
+                          {v.corretor}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700">
-                          {visita.imobiliaria}
+                          {v.imobiliaria}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700">
-                          {traduzirComoChegou(visita.comoChegou)}
+                          {traduzirComoChegou(v.comoChegou)}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-700">
-                          {traduzirComoSoube(visita.comoSoube)}
+                          {traduzirComoSoube(v.comoSoube)}
                         </td>
-                        {session?.user?.role === 'ADMIN' && (
+                        {isAdmin && (
                           <td className="px-4 py-3 text-sm text-gray-700">
-                            {visita.empreendimento.nome}
+                            {v.empreendimento.nome}
                           </td>
                         )}
+                        <td className="px-4 py-3 text-sm">
+                          <BadgeCv status={v.cvStatus} />
+                        </td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                          {v.cvConfirmadoEm ? (
+                            <span className="text-green-700 font-medium">
+                              ✓ {formatarDataHora(v.cvConfirmadoEm)}
+                            </span>
+                          ) : v.cvStatus === 'CADASTRADO' ? (
+                            <span className="text-gray-400">—</span>
+                          ) : (
+                            <button
+                              onClick={() => confirmar(v.id)}
+                              disabled={confirmando === v.id}
+                              className="text-indigo-600 hover:text-indigo-700 font-medium disabled:opacity-50"
+                            >
+                              {confirmando === v.id
+                                ? '...'
+                                : 'Confirmar cadastro'}
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
 
-              {/* Paginação */}
               {totalPages > 1 && (
                 <div className="mt-6 flex justify-center gap-2">
                   <button

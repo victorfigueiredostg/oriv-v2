@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { statusCvPorTelefone } from '@/lib/cv'
 import { z } from 'zod'
 
 const visitaSchema = z.object({
@@ -55,10 +56,15 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const validatedData = visitaSchema.parse(body)
 
+    // Verificação no CVCRM SEMPRE no salvamento (independente do botão no form)
+    const telefone = validatedData.telefone?.trim() || null
+    const cvStatus = await statusCvPorTelefone(telefone)
+
     const visita = await prisma.visita.create({
       data: {
         ...validatedData,
-        telefone: validatedData.telefone?.trim() || null,
+        telefone,
+        cvStatus,
         empreendimentoId: session.user.empreendimentoId,
         usuarioId: parseInt(session.user.id),
       },

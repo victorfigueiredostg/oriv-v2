@@ -21,8 +21,16 @@ interface Visita {
   imobiliaria: string
   comoChegou: string
   comoSoube: string
+  cvStatus: string | null
+  cvConfirmadoEm: string | null
   salvoEm: string
   empreendimento: { nome: string }
+}
+
+const CV_BADGE: Record<string, { txt: string; cls: string }> = {
+  CADASTRADO: { txt: 'Cadastrado', cls: 'bg-green-100 text-green-700' },
+  NAO_CADASTRADO: { txt: 'Não cadastrado', cls: 'bg-red-100 text-red-700' },
+  NAO_PREENCHEU: { txt: 'Não preencheu', cls: 'bg-gray-200 text-gray-600' },
 }
 
 export default function RelatoriosPage() {
@@ -91,6 +99,8 @@ export default function RelatoriosPage() {
                       'Imobiliária',
                       'Tipo de Visita',
                       'Origem',
+                      'CV',
+                      'Confirmação CV',
                     ].map((h) => (
                       <th
                         key={h}
@@ -130,6 +140,28 @@ export default function RelatoriosPage() {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700">
                         {traduzirComoSoube(v.comoSoube)}
+                      </td>
+                      <td className="px-4 py-3 text-sm whitespace-nowrap">
+                        {v.cvStatus && CV_BADGE[v.cvStatus] ? (
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${CV_BADGE[v.cvStatus].cls}`}
+                          >
+                            {CV_BADGE[v.cvStatus].txt}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 text-xs">
+                            não verificado
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                        {v.cvConfirmadoEm ? (
+                          <span className="text-green-700">
+                            ✓ {formatarDataHora(v.cvConfirmadoEm)}
+                          </span>
+                        ) : (
+                          '—'
+                        )}
                       </td>
                     </tr>
                   ))}

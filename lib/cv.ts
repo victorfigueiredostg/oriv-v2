@@ -100,3 +100,22 @@ export function telefoneLocal(s: string): string {
   if (d.length >= 12 && d.startsWith('55')) d = d.slice(2)
   return d
 }
+
+export type CvStatus = 'CADASTRADO' | 'NAO_CADASTRADO' | 'NAO_PREENCHEU'
+
+// Verifica o status do lead no CV por telefone (match exato). Retorna null se
+// não foi possível verificar (CV indisponível/credenciais ausentes).
+export async function statusCvPorTelefone(
+  telefone?: string | null
+): Promise<CvStatus | null> {
+  const digits = apenasDigitos(telefone || '')
+  if (digits.length < 10) return 'NAO_PREENCHEU'
+  try {
+    const { leads } = await buscarLeadsPorTelefone(digits)
+    const alvo = telefoneLocal(telefone || '')
+    const exato = leads.some((l) => telefoneLocal(l.telefone || '') === alvo)
+    return exato ? 'CADASTRADO' : 'NAO_CADASTRADO'
+  } catch {
+    return null
+  }
+}

@@ -35,6 +35,12 @@ export const COMO_SOUBE_OPTIONS = Object.entries(COMO_SOUBE_LABELS).map(
   ([value, label]) => ({ value, label })
 )
 
+export const CV_STATUS_LABELS: Record<string, string> = {
+  CADASTRADO: 'Cadastrado',
+  NAO_CADASTRADO: 'Não cadastrado',
+  NAO_PREENCHEU: 'Não preencheu',
+}
+
 export const formatarDataHora = (data: string) =>
   new Date(data).toLocaleString('pt-BR', {
     day: '2-digit',

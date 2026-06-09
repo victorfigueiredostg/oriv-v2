@@ -46,6 +46,8 @@ model Visita {
   corretor         String
   imobiliaria      String
   comoSoube        ComoSoube
+  cvStatus         String?        // CADASTRADO | NAO_CADASTRADO | NAO_PREENCHEU (verificado no CVCRM ao salvar)
+  cvConfirmadoEm   DateTime?      // quando o gestor confirmou o cadastro manual no CV
   salvoEm          DateTime       @default(now())
 
   @@index([empreendimentoId])
