@@ -6,6 +6,11 @@ import { z } from 'zod'
 
 const visitaSchema = z.object({
   nomeCliente: z.string().min(1, 'Nome do cliente é obrigatório'),
+  idadeCliente: z.coerce
+    .number({ message: 'Idade do cliente é obrigatória' })
+    .int('Idade deve ser um número inteiro')
+    .min(0, 'Idade inválida')
+    .max(120, 'Idade inválida'),
   comoChegou: z.enum(['AGENDADO_CORRETOR', 'CLIENTE_PASSANTE']),
   corretor: z.string().min(1, 'Nome do corretor é obrigatório'),
   imobiliaria: z.string().min(1, 'Nome da imobiliária é obrigatório'),

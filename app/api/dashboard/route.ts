@@ -65,6 +65,20 @@ export async function GET(request: NextRequest) {
     // conexões/threads no engine do Prisma em ambiente compartilhado.
     const totalVisitas = await prisma.visita.count({ where })
 
+    // Média de idade dos leads no filtro selecionado (ignora idades não informadas)
+    const aggIdade = await prisma.visita.aggregate({
+      where,
+      _avg: { idadeCliente: true },
+      _count: { idadeCliente: true },
+    })
+    const mediaIdade = {
+      media:
+        aggIdade._avg.idadeCliente != null
+          ? Math.round(aggIdade._avg.idadeCliente)
+          : null,
+      qtd: aggIdade._count.idadeCliente,
+    }
+
     const totalAnterior = wherePeriodoAnterior
       ? await prisma.visita.count({ where: wherePeriodoAnterior })
       : 0
@@ -186,6 +200,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       totalVisitas,
+      mediaIdade,
       crescimento: {
         atual: totalVisitas,
         anterior: totalAnterior,

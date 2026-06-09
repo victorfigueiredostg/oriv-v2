@@ -14,6 +14,7 @@ import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
 
 interface DashboardData {
   totalVisitas: number
+  mediaIdade: { media: number | null; qtd: number }
   crescimento: { atual: number; anterior: number; percentual: number }
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
   topCorretores: { corretor: string; _count: number }[]
@@ -86,6 +87,33 @@ export default function DashboardPage() {
         <p className="text-gray-500">Carregando...</p>
       ) : (
         <div className="space-y-6">
+          {/* Cartões-resumo */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <p className="text-sm font-medium text-gray-600">
+                Total de visitas
+              </p>
+              <p className="text-4xl font-bold text-indigo-600 mt-2">
+                {data.totalVisitas}
+              </p>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <p className="text-sm font-medium text-gray-600">
+                Média de idade do lead
+              </p>
+              <p className="text-4xl font-bold text-purple-600 mt-2">
+                {data.mediaIdade.media != null
+                  ? `${data.mediaIdade.media} anos`
+                  : '—'}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {data.mediaIdade.qtd > 0
+                  ? `Baseado em ${data.mediaIdade.qtd} lead(s) com idade informada`
+                  : 'Nenhum lead com idade informada no filtro'}
+              </p>
+            </div>
+          </div>
+
           {/* Tendência + comparativo de período */}
           <TendenciaTemporal
             serie={data.serieTemporal}

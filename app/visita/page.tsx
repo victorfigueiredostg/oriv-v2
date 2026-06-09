@@ -12,6 +12,7 @@ export default function VisitaPage() {
 
   const [formData, setFormData] = useState({
     nomeCliente: '',
+    idadeCliente: '',
     comoChegou: '',
     corretor: '',
     imobiliaria: '',
@@ -63,6 +64,7 @@ export default function VisitaPage() {
       // Sucesso - limpar formulário
       setFormData({
         nomeCliente: '',
+        idadeCliente: '',
         comoChegou: '',
         corretor: '',
         imobiliaria: '',
@@ -133,6 +135,29 @@ export default function VisitaPage() {
                 required
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Digite o nome completo"
+              />
+            </div>
+
+            {/* Idade do Cliente */}
+            <div>
+              <label
+                htmlFor="idadeCliente"
+                className="block text-lg font-medium text-gray-700 mb-2"
+              >
+                Idade do Cliente *
+              </label>
+              <input
+                type="number"
+                id="idadeCliente"
+                name="idadeCliente"
+                value={formData.idadeCliente}
+                onChange={handleChange}
+                required
+                min={0}
+                max={120}
+                inputMode="numeric"
+                className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                placeholder="Idade em anos"
               />
             </div>
 

@@ -15,6 +15,7 @@ import {
 interface Visita {
   id: number
   nomeCliente: string
+  idadeCliente: number | null
   corretor: string
   imobiliaria: string
   comoChegou: string
@@ -83,6 +84,7 @@ export default function RelatoriosPage() {
                       'Data/Hora',
                       'Empreendimento',
                       'Cliente',
+                      'Idade',
                       'Corretor',
                       'Imobiliária',
                       'Tipo de Visita',
@@ -108,6 +110,9 @@ export default function RelatoriosPage() {
                       </td>
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">
                         {v.nomeCliente}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {v.idadeCliente ?? '—'}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700">
                         {v.corretor}
