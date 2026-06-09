@@ -122,7 +122,7 @@ export default function VisitasPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1600px] mx-auto">
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-gray-900">
@@ -203,7 +203,7 @@ export default function VisitasPage() {
                       ].map((h) => (
                         <th
                           key={h}
-                          className="px-4 py-3 text-left text-sm font-semibold text-gray-700 whitespace-nowrap"
+                          className="px-3 py-2 text-left text-sm font-semibold text-gray-700 whitespace-nowrap"
                         >
                           {h}
                         </th>
@@ -213,33 +213,33 @@ export default function VisitasPage() {
                   <tbody className="divide-y divide-gray-200">
                     {visitas.map((v) => (
                       <tr key={v.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 text-sm text-gray-900 whitespace-nowrap">
+                        <td className="px-3 py-2 text-sm text-gray-900 whitespace-nowrap">
                           {formatarDataHora(v.salvoEm)}
                         </td>
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                        <td className="px-3 py-2 text-sm font-medium text-gray-900">
                           {v.nomeCliente}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
+                        <td className="px-3 py-2 text-sm text-gray-700">
                           {v.corretor}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
+                        <td className="px-3 py-2 text-sm text-gray-700">
                           {v.imobiliaria}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
+                        <td className="px-3 py-2 text-sm text-gray-700">
                           {traduzirComoChegou(v.comoChegou)}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
+                        <td className="px-3 py-2 text-sm text-gray-700">
                           {traduzirComoSoube(v.comoSoube)}
                         </td>
                         {isAdmin && (
-                          <td className="px-4 py-3 text-sm text-gray-700">
+                          <td className="px-3 py-2 text-sm text-gray-700">
                             {v.empreendimento.nome}
                           </td>
                         )}
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-3 py-2 text-sm">
                           <BadgeCv status={v.cvStatus} />
                         </td>
-                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                        <td className="px-3 py-2 text-sm whitespace-nowrap">
                           {v.cvConfirmadoEm ? (
                             <span className="text-green-700 font-medium">
                               ✓ {formatarDataHora(v.cvConfirmadoEm)}

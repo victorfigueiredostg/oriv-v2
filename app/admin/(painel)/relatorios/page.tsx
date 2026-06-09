@@ -66,7 +66,7 @@ export default function RelatoriosPage() {
   }, [filtros, page])
 
   return (
-    <div className="max-w-6xl">
+    <div className="w-full">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Relatórios</h1>
 
       <FiltrosVisitas value={filtros} onChange={setFiltros} />
@@ -104,7 +104,7 @@ export default function RelatoriosPage() {
                     ].map((h) => (
                       <th
                         key={h}
-                        className="px-4 py-3 text-left text-sm font-semibold text-gray-700"
+                        className="px-3 py-2 text-left text-sm font-semibold text-gray-700"
                       >
                         {h}
                       </th>
@@ -114,34 +114,34 @@ export default function RelatoriosPage() {
                 <tbody className="divide-y divide-gray-200">
                   {visitas.map((v) => (
                     <tr key={v.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-900">
+                      <td className="px-3 py-2 text-sm text-gray-900">
                         {formatarDataHora(v.salvoEm)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {v.empreendimento.nome}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                      <td className="px-3 py-2 text-sm font-medium text-gray-900">
                         {v.nomeCliente}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {v.idadeCliente ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {v.telefone ?? '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {v.corretor}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {v.imobiliaria}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {traduzirComoChegou(v.comoChegou)}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="px-3 py-2 text-sm text-gray-700">
                         {traduzirComoSoube(v.comoSoube)}
                       </td>
-                      <td className="px-4 py-3 text-sm whitespace-nowrap">
+                      <td className="px-3 py-2 text-sm whitespace-nowrap">
                         {v.cvStatus && CV_BADGE[v.cvStatus] ? (
                           <span
                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${CV_BADGE[v.cvStatus].cls}`}
@@ -154,7 +154,7 @@ export default function RelatoriosPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
+                      <td className="px-3 py-2 text-sm text-gray-700 whitespace-nowrap">
                         {v.cvConfirmadoEm ? (
                           <span className="text-green-700">
                             ✓ {formatarDataHora(v.cvConfirmadoEm)}
