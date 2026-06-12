@@ -130,7 +130,7 @@ export default function VisitaPage() {
         {/* Logo do Empreendimento */}
         <div className="bg-white rounded-t-lg shadow-lg p-6 text-center">
           {session?.user?.empreendimento?.logoUrl ? (
-            <div className="relative h-20 w-full">
+            <div className="relative h-32 sm:h-40 w-full">
               <Image
                 src={session.user.empreendimento.logoUrl}
                 alt={session.user.empreendimento.nome}
