@@ -5,6 +5,20 @@ import { prisma } from '@/lib/prisma'
 import { statusCvPorTelefone } from '@/lib/cv'
 import { z } from 'zod'
 
+const COMO_SOUBE_VALUES = [
+  'INSTAGRAM',
+  'FACEBOOK',
+  'WHATSAPP',
+  'CORRETOR',
+  'PANFLETO',
+  'TV',
+  'RADIO',
+  'STAND_CENTRAL_VENDAS',
+  'INDICACAO',
+  'OUTDOOR',
+  'OBRA',
+] as const
+
 const visitaSchema = z.object({
   nomeCliente: z.string().min(1, 'Nome do cliente é obrigatório'),
   telefone: z.string().trim().optional(),
@@ -16,19 +30,9 @@ const visitaSchema = z.object({
   comoChegou: z.enum(['AGENDADO_CORRETOR', 'CLIENTE_PASSANTE']),
   corretor: z.string().min(1, 'Nome do corretor é obrigatório'),
   imobiliaria: z.string().min(1, 'Nome da imobiliária é obrigatório'),
-  comoSoube: z.enum([
-    'INSTAGRAM',
-    'FACEBOOK',
-    'WHATSAPP',
-    'CORRETOR',
-    'PANFLETO',
-    'TV',
-    'RADIO',
-    'STAND_CENTRAL_VENDAS',
-    'INDICACAO',
-    'OUTDOOR',
-    'OBRA',
-  ]),
+  comoSoube: z.enum(COMO_SOUBE_VALUES),
+  // "Onde mais viu/ouviu" — múltiplas origens (opcional)
+  ondeMaisViu: z.array(z.enum(COMO_SOUBE_VALUES)).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -54,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const validatedData = visitaSchema.parse(body)
+    const { ondeMaisViu, ...validatedData } = visitaSchema.parse(body)
 
     // Verificação no CVCRM SEMPRE no salvamento (independente do botão no form)
     const telefone = validatedData.telefone?.trim() || null
@@ -65,6 +69,7 @@ export async function POST(request: NextRequest) {
         ...validatedData,
         telefone,
         cvStatus,
+        ondeMaisViu: ondeMaisViu?.length ? ondeMaisViu.join(',') : null,
         empreendimentoId: session.user.empreendimentoId,
         usuarioId: parseInt(session.user.id),
       },

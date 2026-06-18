@@ -21,6 +21,7 @@ interface Visita {
   imobiliaria: string
   comoChegou: string
   comoSoube: string
+  ondeMaisViu: string | null
   cvStatus: string | null
   cvConfirmadoEm: string | null
   salvoEm: string
@@ -99,6 +100,7 @@ export default function RelatoriosPage() {
                       'Imobiliária',
                       'Tipo de Visita',
                       'Origem',
+                      'Onde mais viu',
                       'CV',
                       'Confirmação CV',
                     ].map((h) => (
@@ -140,6 +142,14 @@ export default function RelatoriosPage() {
                       </td>
                       <td className="px-3 py-2 text-sm text-gray-700">
                         {traduzirComoSoube(v.comoSoube)}
+                      </td>
+                      <td className="px-3 py-2 text-sm text-gray-700">
+                        {v.ondeMaisViu
+                          ? v.ondeMaisViu
+                              .split(',')
+                              .map((x) => traduzirComoSoube(x.trim()))
+                              .join(', ')
+                          : '—'}
                       </td>
                       <td className="px-3 py-2 text-sm whitespace-nowrap">
                         {v.cvStatus && CV_BADGE[v.cvStatus] ? (

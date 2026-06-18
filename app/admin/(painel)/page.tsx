@@ -9,7 +9,7 @@ import FiltrosVisitas, {
 import '@/components/charts/registrarChart'
 import OrigemPizza from '@/components/dashboard/OrigemPizza'
 import CruzamentoTipoOrigem from '@/components/dashboard/CruzamentoTipoOrigem'
-import TendenciaTemporal from '@/components/dashboard/TendenciaTemporal'
+import TendenciaAnual from '@/components/dashboard/TendenciaAnual'
 import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
 
 interface DashboardData {
@@ -17,6 +17,7 @@ interface DashboardData {
   mediaIdade: { media: number | null; qtd: number }
   crescimento: { atual: number; anterior: number; percentual: number }
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
+  origensTotais: { comoSoube: string; _count: number }[]
   topCorretores: { corretor: string; _count: number }[]
   topImobiliarias: { imobiliaria: string; _count: number }[]
   rankEmpreendimentos: { nome: string; total: number }[]
@@ -114,18 +115,27 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Tendência + comparativo de período */}
-          <TendenciaTemporal
-            serie={data.serieTemporal}
-            crescimento={data.crescimento}
-          />
+          {/* Tendência de visitas (anual, por mês) — independente dos filtros */}
+          <TendenciaAnual />
 
-          {/* Origem do lead */}
+          {/* Primeiro contato do Lead (como ficou sabendo) */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Origem do lead
+              Primeiro contato do Lead
             </h2>
             <OrigemPizza data={data.visitasPorComoSoube} />
+          </div>
+
+          {/* Origem do Lead — abrange 1º contato + onde mais viu/ouviu */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-1">
+              Origem do Lead
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Considera o primeiro contato e todas as respostas de “onde mais
+              viu/ouviu”.
+            </p>
+            <OrigemPizza data={data.origensTotais} />
           </div>
 
           {/* Cruzamento Tipo de Visita x Origem */}

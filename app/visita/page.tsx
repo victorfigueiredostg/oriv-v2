@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import ImobiliariaInput from '@/components/ImobiliariaInput'
+import { COMO_SOUBE_OPTIONS } from '@/lib/labels'
 
 export default function VisitaPage() {
   const { data: session, status } = useSession()
@@ -18,7 +19,17 @@ export default function VisitaPage() {
     corretor: '',
     imobiliaria: '',
     comoSoube: '',
+    ondeMaisViu: [] as string[],
   })
+
+  const toggleOnde = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      ondeMaisViu: prev.ondeMaisViu.includes(value)
+        ? prev.ondeMaisViu.filter((v) => v !== value)
+        : [...prev.ondeMaisViu, value],
+    }))
+  }
 
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState('')
@@ -102,6 +113,7 @@ export default function VisitaPage() {
         corretor: '',
         imobiliaria: '',
         comoSoube: '',
+        ondeMaisViu: [],
       })
       setCvResultado(null)
       setSucesso(true)
@@ -246,6 +258,36 @@ export default function VisitaPage() {
                 <option value="OUTDOOR">Outdoor</option>
                 <option value="OBRA">Obra</option>
               </select>
+            </div>
+
+            {/* Onde mais viu/ouviu (multi-seleção) */}
+            <div>
+              <label className="block text-lg font-medium text-gray-700 mb-2">
+                Onde mais você viu ou ouviu falar sobre o empreendimento?
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {COMO_SOUBE_OPTIONS.map((o) => {
+                  const marcado = formData.ondeMaisViu.includes(o.value)
+                  return (
+                    <label
+                      key={o.value}
+                      className={`flex items-center gap-2 px-3 py-3 border rounded-lg cursor-pointer text-base ${
+                        marcado
+                          ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                          : 'border-gray-300 text-gray-800 hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={marcado}
+                        onChange={() => toggleOnde(o.value)}
+                        className="w-5 h-5"
+                      />
+                      <span>{o.label}</span>
+                    </label>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Corretor */}
