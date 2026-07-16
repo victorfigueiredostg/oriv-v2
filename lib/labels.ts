@@ -18,6 +18,9 @@ export const COMO_SOUBE_LABELS: Record<string, string> = {
   INDICACAO: 'Indicação',
   OUTDOOR: 'Outdoor',
   OBRA: 'Obra',
+  FAIXA_PASSARELA_SAO_CRISTOVAO: 'Faixa na passarela de São Cristóvão',
+  GOOGLE: 'Pesquisa no Google',
+  TV_HOSPITAL_SAO_RAFAEL: 'Tv do Hospital São Rafael',
 }
 
 export const traduzirComoChegou = (valor: string) =>
@@ -34,6 +37,33 @@ export const COMO_CHEGOU_OPTIONS = Object.entries(COMO_CHEGOU_LABELS).map(
 export const COMO_SOUBE_OPTIONS = Object.entries(COMO_SOUBE_LABELS).map(
   ([value, label]) => ({ value, label })
 )
+
+// Opções de origem restritas a empreendimentos específicos (por slug).
+// Existem no sistema, mas só aparecem no formulário do empreendimento indicado.
+export const COMO_SOUBE_RESTRITAS_POR_SLUG: Record<string, string[]> = {
+  'vivai-sao-rafael': ['TV_HOSPITAL_SAO_RAFAEL'],
+}
+
+const VALORES_RESTRITOS = new Set(
+  Object.values(COMO_SOUBE_RESTRITAS_POR_SLUG).flat()
+)
+
+// Opções que aparecem para todos os empreendimentos (exclui as restritas)
+export const COMO_SOUBE_OPTIONS_GLOBAIS = COMO_SOUBE_OPTIONS.filter(
+  (o) => !VALORES_RESTRITOS.has(o.value)
+)
+
+// Opções do formulário para um empreendimento: globais + extras do slug
+export function opcoesComoSoube(slug?: string) {
+  const extras = (slug && COMO_SOUBE_RESTRITAS_POR_SLUG[slug]) || []
+  return [
+    ...COMO_SOUBE_OPTIONS_GLOBAIS,
+    ...extras.map((value) => ({
+      value,
+      label: COMO_SOUBE_LABELS[value] || value,
+    })),
+  ]
+}
 
 export const CV_STATUS_LABELS: Record<string, string> = {
   CADASTRADO: 'Cadastrado',

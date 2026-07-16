@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import ImobiliariaInput from '@/components/ImobiliariaInput'
-import { COMO_SOUBE_OPTIONS } from '@/lib/labels'
+import { opcoesComoSoube } from '@/lib/labels'
 
 export default function VisitaPage() {
   const { data: session, status } = useSession()
@@ -136,6 +136,9 @@ export default function VisitaPage() {
     }))
   }
 
+  // Opções de origem do empreendimento logado (globais + extras específicas)
+  const opcoesOrigem = opcoesComoSoube(session?.user?.empreendimento?.slug)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
       <div className="max-w-3xl mx-auto">
@@ -246,17 +249,11 @@ export default function VisitaPage() {
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               >
                 <option value="">Selecione uma opção</option>
-                <option value="INSTAGRAM">Instagram</option>
-                <option value="FACEBOOK">Facebook</option>
-                <option value="WHATSAPP">WhatsApp</option>
-                <option value="CORRETOR">Corretor</option>
-                <option value="PANFLETO">Panfleto</option>
-                <option value="TV">TV</option>
-                <option value="RADIO">Rádio</option>
-                <option value="STAND_CENTRAL_VENDAS">Stand/Central de Vendas</option>
-                <option value="INDICACAO">Indicação</option>
-                <option value="OUTDOOR">Outdoor</option>
-                <option value="OBRA">Obra</option>
+                {opcoesOrigem.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -266,7 +263,7 @@ export default function VisitaPage() {
                 Onde mais você viu ou ouviu falar sobre o empreendimento?
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {COMO_SOUBE_OPTIONS.map((o) => {
+                {opcoesOrigem.map((o) => {
                   const marcado = formData.ondeMaisViu.includes(o.value)
                   return (
                     <label

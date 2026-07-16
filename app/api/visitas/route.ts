@@ -17,6 +17,9 @@ const COMO_SOUBE_VALUES = [
   'INDICACAO',
   'OUTDOOR',
   'OBRA',
+  'FAIXA_PASSARELA_SAO_CRISTOVAO',
+  'GOOGLE',
+  'TV_HOSPITAL_SAO_RAFAEL',
 ] as const
 
 const visitaSchema = z.object({
