@@ -238,7 +238,7 @@ export default function VisitaPage() {
                 htmlFor="comoSoube"
                 className="block text-lg font-medium text-gray-700 mb-2"
               >
-                Como ficou sabendo do empreendimento? *
+                Como ficou sabendo do empreendimento pela primeira vez? *
               </label>
               <select
                 id="comoSoube"
