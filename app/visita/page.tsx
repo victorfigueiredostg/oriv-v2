@@ -37,6 +37,43 @@ export default function VisitaPage() {
   const [cvResultado, setCvResultado] = useState<any>(null)
   const [verificandoCv, setVerificandoCv] = useState(false)
 
+  // Trava de senha para "Ver Visitas"
+  const [gateAberto, setGateAberto] = useState(false)
+  const [gateUser, setGateUser] = useState('')
+  const [gateSenha, setGateSenha] = useState('')
+  const [gateErro, setGateErro] = useState('')
+  const [gateChecando, setGateChecando] = useState(false)
+
+  const abrirGate = () => {
+    setGateUser('')
+    setGateSenha('')
+    setGateErro('')
+    setGateAberto(true)
+  }
+
+  const validarGate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setGateErro('')
+    setGateChecando(true)
+    try {
+      const res = await fetch('/api/stand-gate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usuario: gateUser, senha: gateSenha }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        router.push('/visitas')
+      } else {
+        setGateErro('Usuário ou senha inválidos.')
+      }
+    } catch {
+      setGateErro('Erro ao validar. Tente novamente.')
+    } finally {
+      setGateChecando(false)
+    }
+  }
+
   const verificarCv = async () => {
     setCvResultado(null)
     if (!formData.telefone.trim()) {
@@ -411,12 +448,62 @@ export default function VisitaPage() {
         {/* Botões de navegação */}
         <div className="mt-6 flex justify-center">
           <button
-            onClick={() => router.push('/visitas')}
+            onClick={abrirGate}
             className="bg-white text-indigo-600 py-2 px-5 rounded-lg font-medium text-sm hover:bg-gray-50 border border-indigo-600 transition-colors"
           >
             Ver Visitas
           </button>
         </div>
+
+        {/* Modal de senha para Ver Visitas */}
+        {gateAberto && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center px-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm">
+              <h3 className="text-lg font-bold text-gray-900 mb-1">
+                Acesso às visitas
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Informe usuário e senha para visualizar as visitas registradas.
+              </p>
+              <form onSubmit={validarGate} className="space-y-3">
+                <input
+                  type="text"
+                  value={gateUser}
+                  onChange={(e) => setGateUser(e.target.value)}
+                  placeholder="Usuário"
+                  autoComplete="off"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500"
+                />
+                <input
+                  type="password"
+                  value={gateSenha}
+                  onChange={(e) => setGateSenha(e.target.value)}
+                  placeholder="Senha"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500"
+                />
+                {gateErro && (
+                  <p className="text-sm text-red-600">{gateErro}</p>
+                )}
+                <div className="flex gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setGateAberto(false)}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2.5 rounded-lg font-semibold hover:bg-gray-300"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={gateChecando}
+                    className="flex-1 bg-indigo-600 text-white py-2.5 rounded-lg font-semibold hover:bg-indigo-700 disabled:opacity-50"
+                  >
+                    {gateChecando ? 'Verificando...' : 'Entrar'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

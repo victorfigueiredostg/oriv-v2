@@ -13,6 +13,7 @@ import {
 interface Visita {
   id: number
   nomeCliente: string
+  telefone: string | null
   corretor: string
   imobiliaria: string
   comoChegou: string
@@ -193,6 +194,7 @@ export default function VisitasPage() {
                       {[
                         'Data/Hora',
                         'Cliente',
+                        'Telefone',
                         'Corretor',
                         'Imobiliária',
                         'Tipo de Visita',
@@ -218,6 +220,9 @@ export default function VisitasPage() {
                         </td>
                         <td className="px-3 py-2 text-sm font-medium text-gray-900">
                           {v.nomeCliente}
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-700 whitespace-nowrap">
+                          {v.telefone ?? '—'}
                         </td>
                         <td className="px-3 py-2 text-sm text-gray-700">
                           {v.corretor}
