@@ -83,6 +83,7 @@ export default function ImobiliariaInput({
                   setAberto(false)
                 }}
                 className="w-full text-left px-4 py-3 hover:bg-indigo-50 text-gray-900"
+                translate="no"
               >
                 {nome}
               </button>
