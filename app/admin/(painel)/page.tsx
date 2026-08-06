@@ -198,8 +198,11 @@ export default function DashboardPage() {
                         <span className="text-gray-400"> — {item.imobiliaria}</span>
                       )}
                     </span>
-                    <span className="text-sm font-bold text-indigo-600">
-                      {Math.round((item._count / (data.totalVisitas || 1)) * 100)}%
+                    <span className="text-sm font-bold text-indigo-600 whitespace-nowrap">
+                      {item._count}{' '}
+                      <span className="text-gray-400 font-normal">
+                        ({Math.round((item._count / (data.totalVisitas || 1)) * 100)}%)
+                      </span>
                     </span>
                   </div>
                 ))}
@@ -225,8 +228,11 @@ export default function DashboardPage() {
                       </span>
                       {item.imobiliaria}
                     </span>
-                    <span className="text-sm font-bold text-indigo-600">
-                      {Math.round((item._count / (data.totalVisitas || 1)) * 100)}%
+                    <span className="text-sm font-bold text-indigo-600 whitespace-nowrap">
+                      {item._count}{' '}
+                      <span className="text-gray-400 font-normal">
+                        ({Math.round((item._count / (data.totalVisitas || 1)) * 100)}%)
+                      </span>
                     </span>
                   </div>
                 ))}
