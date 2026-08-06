@@ -36,6 +36,7 @@ export default function VisitaPage() {
   const [sucesso, setSucesso] = useState(false)
   const [cvResultado, setCvResultado] = useState<any>(null)
   const [verificandoCv, setVerificandoCv] = useState(false)
+  const [resetKey, setResetKey] = useState(0)
 
   // Trava de senha para "Ver Visitas"
   const [gateAberto, setGateAberto] = useState(false)
@@ -153,6 +154,7 @@ export default function VisitaPage() {
         ondeMaisViu: [],
       })
       setCvResultado(null)
+      setResetKey((k) => k + 1)
       setSucesso(true)
 
       // Remover mensagem de sucesso após 3s
@@ -410,6 +412,7 @@ export default function VisitaPage() {
                 Imobiliária *
               </label>
               <ImobiliariaInput
+                key={resetKey}
                 id="imobiliaria"
                 value={formData.imobiliaria}
                 onChange={(v) =>
@@ -417,7 +420,7 @@ export default function VisitaPage() {
                 }
                 required
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Pesquisar ou digitar a imobiliária"
+                placeholder="Pesquise e selecione a imobiliária"
               />
             </div>
 
