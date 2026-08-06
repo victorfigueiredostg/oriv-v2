@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import ImobiliariaInput from '@/components/ImobiliariaInput'
+import CorretorInput from '@/components/CorretorInput'
 import { opcoesComoSoube } from '@/lib/labels'
 
 export default function VisitaPage() {
@@ -391,12 +392,13 @@ export default function VisitaPage() {
               >
                 Corretor *
               </label>
-              <input
-                type="text"
+              <CorretorInput
+                key={`corretor-${resetKey}`}
                 id="corretor"
-                name="corretor"
                 value={formData.corretor}
-                onChange={handleChange}
+                onChange={(v) =>
+                  setFormData((prev) => ({ ...prev, corretor: v }))
+                }
                 required
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                 placeholder="Nome do corretor"

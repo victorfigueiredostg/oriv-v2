@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
     const visita = await prisma.visita.create({
       data: {
         ...validatedData,
+        corretor: validatedData.corretor.trim().replace(/\s+/g, ' ').toUpperCase(),
         telefone,
         cvStatus,
         ondeMaisViu: ondeMaisViu?.length ? ondeMaisViu.join(',') : null,
