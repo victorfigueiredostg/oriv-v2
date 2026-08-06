@@ -13,6 +13,11 @@ const NAV = [
     match: (p: string) => p.startsWith('/admin/relatorios'),
   },
   {
+    href: '/admin/imobiliarias',
+    label: 'Imobiliárias',
+    match: (p: string) => p.startsWith('/admin/imobiliarias'),
+  },
+  {
     href: '/admin/configuracoes',
     label: 'Configurações',
     match: (p: string) =>
