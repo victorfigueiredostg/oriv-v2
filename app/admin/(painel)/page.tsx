@@ -18,7 +18,7 @@ interface DashboardData {
   crescimento: { atual: number; anterior: number; percentual: number }
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
   origensTotais: { comoSoube: string; _count: number }[]
-  topCorretores: { corretor: string; _count: number }[]
+  topCorretores: { corretor: string; imobiliaria: string; _count: number }[]
   topImobiliarias: { imobiliaria: string; _count: number }[]
   rankEmpreendimentos: { nome: string; total: number }[]
   crossTipoOrigem: { comoChegou: string; comoSoube: string; _count: number }[]
@@ -194,9 +194,12 @@ export default function DashboardPage() {
                         #{i + 1}
                       </span>
                       {item.corretor}
+                      {item.imobiliaria && (
+                        <span className="text-gray-400"> — {item.imobiliaria}</span>
+                      )}
                     </span>
                     <span className="text-sm font-bold text-indigo-600">
-                      {item._count}
+                      {Math.round((item._count / (data.totalVisitas || 1)) * 100)}%
                     </span>
                   </div>
                 ))}
@@ -223,7 +226,7 @@ export default function DashboardPage() {
                       {item.imobiliaria}
                     </span>
                     <span className="text-sm font-bold text-indigo-600">
-                      {item._count}
+                      {Math.round((item._count / (data.totalVisitas || 1)) * 100)}%
                     </span>
                   </div>
                 ))}

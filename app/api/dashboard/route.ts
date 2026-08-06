@@ -95,13 +95,42 @@ export async function GET(request: NextRequest) {
       _count: true,
     })
 
-    const topCorretores = await prisma.visita.groupBy({
-      by: ['corretor'],
+    // Top corretores: total por corretor + imobiliária predominante dele
+    const gruposCorretor = await prisma.visita.groupBy({
+      by: ['corretor', 'imobiliaria'],
       where,
       _count: true,
-      orderBy: { _count: { corretor: 'desc' } },
-      take: 10,
     })
+    const corretorMap = new Map<
+      string,
+      { total: number; imobs: Map<string, number> }
+    >()
+    for (const g of gruposCorretor) {
+      const entry = corretorMap.get(g.corretor) || {
+        total: 0,
+        imobs: new Map<string, number>(),
+      }
+      entry.total += g._count
+      entry.imobs.set(
+        g.imobiliaria,
+        (entry.imobs.get(g.imobiliaria) || 0) + g._count
+      )
+      corretorMap.set(g.corretor, entry)
+    }
+    const topCorretores = [...corretorMap.entries()]
+      .map(([corretor, { total, imobs }]) => {
+        let imobiliaria = ''
+        let max = -1
+        for (const [im, n] of imobs) {
+          if (n > max) {
+            max = n
+            imobiliaria = im
+          }
+        }
+        return { corretor, imobiliaria, _count: total }
+      })
+      .sort((a, b) => b._count - a._count)
+      .slice(0, 10)
 
     const topImobiliarias = await prisma.visita.groupBy({
       by: ['imobiliaria'],
