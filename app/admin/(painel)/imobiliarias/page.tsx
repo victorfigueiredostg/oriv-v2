@@ -20,7 +20,12 @@ interface ImobAnalise {
   agendados: number
   passantes: number
   corretores: { nome: string; total: number }[]
-  porEmpreendimento: { nome: string; total: number }[]
+  porEmpreendimento: {
+    nome: string
+    total: number
+    agendados: number
+    passantes: number
+  }[]
 }
 interface Dados {
   totalGeral: number
@@ -76,6 +81,8 @@ export default function ImobiliariasPage() {
             Imobiliária: im.nome,
             Empreendimento: e.nome,
             'Total de visitas': e.total,
+            Agendados: e.agendados,
+            Passantes: e.passantes,
           })
         )
       )
@@ -274,13 +281,17 @@ export default function ImobiliariasPage() {
                                 {im.porEmpreendimento.map((e) => (
                                   <li
                                     key={e.nome}
-                                    className="flex justify-between text-sm"
+                                    className="flex justify-between gap-3 text-sm"
                                   >
                                     <span className="text-gray-700">
                                       {e.nome}
                                     </span>
-                                    <span className="font-medium text-gray-900">
-                                      {e.total}
+                                    <span className="font-medium text-gray-900 whitespace-nowrap">
+                                      {e.total}{' '}
+                                      <span className="text-gray-400 font-normal">
+                                        ({e.agendados} agend. / {e.passantes}{' '}
+                                        pass.)
+                                      </span>
                                     </span>
                                   </li>
                                 ))}

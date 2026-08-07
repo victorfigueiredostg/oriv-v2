@@ -41,12 +41,17 @@ export async function GET(request: NextRequest) {
 
     const nomeEmp = Object.fromEntries(empreendimentos.map((e) => [e.id, e.nome]))
 
+    interface EmpAgg {
+      total: number
+      agendados: number
+      passantes: number
+    }
     interface Agg {
       total: number
       agendados: number
       passantes: number
       corretores: Map<string, number>
-      empreend: Map<number, number>
+      empreend: Map<number, EmpAgg>
     }
     const mapa = new Map<string, Agg>()
     for (const v of linhas) {
@@ -60,15 +65,20 @@ export async function GET(request: NextRequest) {
           corretores: new Map(),
           empreend: new Map(),
         } as Agg)
+      const agendado = v.comoChegou === 'AGENDADO_CORRETOR'
+      const passante = v.comoChegou === 'CLIENTE_PASSANTE'
       a.total++
-      if (v.comoChegou === 'AGENDADO_CORRETOR') a.agendados++
-      else if (v.comoChegou === 'CLIENTE_PASSANTE') a.passantes++
+      if (agendado) a.agendados++
+      else if (passante) a.passantes++
       if (v.corretor)
         a.corretores.set(v.corretor, (a.corretores.get(v.corretor) || 0) + 1)
-      a.empreend.set(
-        v.empreendimentoId,
-        (a.empreend.get(v.empreendimentoId) || 0) + 1
-      )
+      const e =
+        a.empreend.get(v.empreendimentoId) ||
+        ({ total: 0, agendados: 0, passantes: 0 } as EmpAgg)
+      e.total++
+      if (agendado) e.agendados++
+      else if (passante) e.passantes++
+      a.empreend.set(v.empreendimentoId, e)
       mapa.set(imob, a)
     }
 
@@ -83,7 +93,12 @@ export async function GET(request: NextRequest) {
           .map(([n, t]) => ({ nome: n, total: t }))
           .sort((x, y) => y.total - x.total),
         porEmpreendimento: [...a.empreend.entries()]
-          .map(([id, t]) => ({ nome: nomeEmp[id] || `#${id}`, total: t }))
+          .map(([id, e]) => ({
+            nome: nomeEmp[id] || `#${id}`,
+            total: e.total,
+            agendados: e.agendados,
+            passantes: e.passantes,
+          }))
           .sort((x, y) => y.total - x.total),
       }))
       .sort((x, y) => y.total - x.total)
