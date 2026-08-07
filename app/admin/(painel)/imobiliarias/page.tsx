@@ -286,7 +286,11 @@ export default function ImobiliariasPage() {
                                     <span className="font-medium text-gray-900">
                                       {c.total}{' '}
                                       <span className="text-gray-400">
-                                        ({pct(c.total)}%)
+                                        (
+                                        {im.total
+                                          ? Math.round((c.total / im.total) * 100)
+                                          : 0}
+                                        %)
                                       </span>
                                     </span>
                                   </li>
@@ -297,25 +301,39 @@ export default function ImobiliariasPage() {
                               <h4 className="font-semibold text-gray-800 mb-2">
                                 Por empreendimento
                               </h4>
-                              <ul className="space-y-1">
-                                {im.porEmpreendimento.map((e) => (
-                                  <li
-                                    key={e.nome}
-                                    className="flex justify-between gap-3 text-sm"
-                                  >
-                                    <span className="text-gray-700">
-                                      {e.nome}
-                                    </span>
-                                    <span className="font-medium text-gray-900 whitespace-nowrap">
-                                      {e.total}{' '}
-                                      <span className="text-gray-400 font-normal">
-                                        ({e.agendados} agend. / {e.passantes}{' '}
-                                        pass.)
-                                      </span>
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="text-gray-500 border-b border-gray-200">
+                                    <th className="text-left font-medium py-1">
+                                      Empreendimento
+                                    </th>
+                                    <th className="text-center font-medium py-1 px-2">
+                                      Agendamento
+                                    </th>
+                                    <th className="text-center font-medium py-1 px-2">
+                                      Passante
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {im.porEmpreendimento.map((e) => (
+                                    <tr
+                                      key={e.nome}
+                                      className="border-b border-gray-100"
+                                    >
+                                      <td className="py-1 text-gray-700">
+                                        {e.nome}
+                                      </td>
+                                      <td className="py-1 px-2 text-center font-medium text-gray-900">
+                                        {e.agendados}
+                                      </td>
+                                      <td className="py-1 px-2 text-center font-medium text-gray-900">
+                                        {e.passantes}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
                           </div>
                         </td>
