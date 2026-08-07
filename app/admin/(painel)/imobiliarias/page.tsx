@@ -26,10 +26,18 @@ interface ImobAnalise {
     agendados: number
     passantes: number
   }[]
+  vendas: number
+  vendasDetalhe: {
+    codigo: string
+    empreendimento: string
+    corretor: string
+    dataVenda: string
+  }[]
 }
 interface Dados {
   totalGeral: number
   imobiliarias: ImobAnalise[]
+  vendasIndisponivel?: boolean
 }
 
 export default function ImobiliariasPage() {
@@ -166,6 +174,12 @@ export default function ImobiliariasPage() {
         </p>
       ) : (
         <div className="space-y-6">
+          {dados.vendasIndisponivel && (
+            <p className="text-sm text-yellow-800 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
+              Não foi possível carregar as vendas do CVCRM agora — as colunas de
+              Vendas/Conversão podem estar zeradas.
+            </p>
+          )}
           {/* Gráfico ranking */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
@@ -195,6 +209,8 @@ export default function ImobiliariasPage() {
                     'Visitas',
                     'Agendados',
                     'Passantes',
+                    'Vendas',
+                    'Conversão',
                     'Corretores',
                     '',
                   ].map((h) => (
@@ -232,6 +248,12 @@ export default function ImobiliariasPage() {
                       <td className="px-3 py-2 text-sm text-gray-700">
                         {im.passantes}
                       </td>
+                      <td className="px-3 py-2 text-sm font-bold text-green-700">
+                        {im.vendas}
+                      </td>
+                      <td className="px-3 py-2 text-sm text-gray-700">
+                        {im.total > 0 ? `${Math.round((im.vendas / im.total) * 100)}%` : '—'}
+                      </td>
                       <td className="px-3 py-2 text-sm text-gray-700">
                         {im.corretores.length}
                       </td>
@@ -268,7 +290,7 @@ export default function ImobiliariasPage() {
                     </tr>
                     {expandida === im.nome && (
                       <tr>
-                        <td colSpan={7} className="bg-gray-50 px-3 py-4">
+                        <td colSpan={9} className="bg-gray-50 px-3 py-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                               <h4 className="font-semibold text-gray-800 mb-2">
@@ -335,6 +357,69 @@ export default function ImobiliariasPage() {
                                 </tbody>
                               </table>
                             </div>
+                          </div>
+
+                          <div className="mt-6">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                              Vendas (CV){' '}
+                              <span className="text-gray-400 font-normal">
+                                — {im.vendas}
+                              </span>
+                            </h4>
+                            {im.vendas === 0 ? (
+                              <p className="text-sm text-gray-500">
+                                Nenhuma venda no período.
+                              </p>
+                            ) : (
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="text-gray-500 border-b border-gray-200">
+                                      <th className="text-left font-medium py-1 pr-3">
+                                        Código reserva
+                                      </th>
+                                      <th className="text-left font-medium py-1 pr-3">
+                                        Empreendimento
+                                      </th>
+                                      <th className="text-left font-medium py-1 pr-3">
+                                        Corretor
+                                      </th>
+                                      <th className="text-left font-medium py-1">
+                                        Data da venda
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {im.vendasDetalhe.map((v) => (
+                                      <tr
+                                        key={v.codigo}
+                                        className="border-b border-gray-100"
+                                      >
+                                        <td className="py-1 pr-3 font-medium text-gray-900">
+                                          {v.codigo}
+                                        </td>
+                                        <td className="py-1 pr-3 text-gray-700">
+                                          {v.empreendimento}
+                                        </td>
+                                        <td
+                                          className="py-1 pr-3 text-gray-700"
+                                          translate="no"
+                                        >
+                                          {v.corretor}
+                                        </td>
+                                        <td className="py-1 text-gray-700">
+                                          {v.dataVenda
+                                            ? new Date(
+                                                v.dataVenda.replace(' ', 'T')
+                                              ).toLocaleDateString('pt-BR')
+                                            : '—'}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
