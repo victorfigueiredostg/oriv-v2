@@ -240,9 +240,29 @@ export default function ImobiliariasPage() {
                           onClick={() =>
                             setExpandida(expandida === im.nome ? null : im.nome)
                           }
-                          className="text-indigo-600 hover:text-indigo-700 font-medium"
+                          aria-expanded={expandida === im.nome}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+                            expandida === im.nome
+                              ? 'border-indigo-600 bg-indigo-600 text-white hover:bg-indigo-700'
+                              : 'border-indigo-200 text-indigo-600 hover:bg-indigo-50'
+                          }`}
                         >
-                          {expandida === im.nome ? 'Ocultar ▲' : 'Detalhes ▼'}
+                          {expandida === im.nome ? 'Ocultar' : 'Detalhes'}
+                          <svg
+                            className={`w-4 h-4 transition-transform ${
+                              expandida === im.nome ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
+                          </svg>
                         </button>
                       </td>
                     </tr>
