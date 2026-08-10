@@ -78,6 +78,15 @@ export default function DashboardPage() {
     ...(data?.rankEmpreendimentos.map((i) => i.total) || [0])
   )
 
+  const somaTipo = (tipo: string) =>
+    data?.crossTipoOrigem
+      .filter((x) => x.comoChegou === tipo)
+      .reduce((s, x) => s + x._count, 0) || 0
+  const agendados = somaTipo('AGENDADO_CORRETOR')
+  const passantes = somaTipo('CLIENTE_PASSANTE')
+  const pctTotal = (n: number) =>
+    data && data.totalVisitas ? Math.round((n / data.totalVisitas) * 100) : 0
+
   return (
     <div className="max-w-6xl">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
@@ -89,13 +98,31 @@ export default function DashboardPage() {
       ) : (
         <div className="space-y-6">
           {/* Cartões-resumo */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="bg-white rounded-lg shadow-lg p-6">
               <p className="text-sm font-medium text-gray-600">
                 Total de visitas
               </p>
               <p className="text-4xl font-bold text-indigo-600 mt-2">
                 {data.totalVisitas}
+              </p>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <p className="text-sm font-medium text-gray-600">Agendados</p>
+              <p className="text-4xl font-bold text-green-600 mt-2">
+                {agendados}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {pctTotal(agendados)}% do total
+              </p>
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <p className="text-sm font-medium text-gray-600">Passantes</p>
+              <p className="text-4xl font-bold text-orange-600 mt-2">
+                {passantes}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {pctTotal(passantes)}% do total
               </p>
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6">

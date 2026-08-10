@@ -38,6 +38,7 @@ export default function ImobiliariasPage() {
   const [carregando, setCarregando] = useState(true)
   const [expandida, setExpandida] = useState<string | null>(null)
   const [exportando, setExportando] = useState(false)
+  const [imobFiltro, setImobFiltro] = useState('')
 
   useEffect(() => {
     const carregar = async () => {
@@ -129,7 +130,10 @@ export default function ImobiliariasPage() {
     }
   }
 
-  const top = (dados?.imobiliarias || []).slice(0, 15)
+  const listaFiltrada = (dados?.imobiliarias || []).filter(
+    (i) => !imobFiltro || i.nome === imobFiltro
+  )
+  const top = listaFiltrada.slice(0, 15)
   const chartData = {
     labels: top.map((i) => i.nome),
     datasets: [
@@ -157,6 +161,26 @@ export default function ImobiliariasPage() {
       </div>
 
       <FiltrosVisitas value={filtros} onChange={setFiltros} />
+
+      {dados && dados.imobiliarias.length > 0 && (
+        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Imobiliária
+          </label>
+          <select
+            value={imobFiltro}
+            onChange={(e) => setImobFiltro(e.target.value)}
+            className="w-full sm:w-80 px-3 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="">Todas</option>
+            {dados.imobiliarias.map((i) => (
+              <option key={i.nome} value={i.nome}>
+                {i.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {carregando || !dados ? (
         <p className="text-gray-500">Carregando...</p>
@@ -208,7 +232,7 @@ export default function ImobiliariasPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {dados.imobiliarias.map((im, i) => (
+                {listaFiltrada.map((im, i) => (
                   <Fragment key={im.nome}>
                     <tr className="hover:bg-gray-50">
                       <td className="px-3 py-2 text-sm text-gray-400 font-bold">
