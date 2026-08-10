@@ -133,6 +133,8 @@ export default function ImobiliariasPage() {
   const listaFiltrada = (dados?.imobiliarias || []).filter(
     (i) => !imobFiltro || i.nome === imobFiltro
   )
+  // Soma refletindo o filtro: uma imobiliária específica ou todas
+  const totalExibido = listaFiltrada.reduce((acc, i) => acc + i.total, 0)
   const top = listaFiltrada.slice(0, 15)
   const chartData = {
     labels: top.map((i) => i.nome),
@@ -193,7 +195,7 @@ export default function ImobiliariasPage() {
           {/* Gráfico ranking */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Visitas por imobiliária ({totalGeral} no total)
+              Total de Visitas ({totalExibido})
             </h2>
             <div className="h-72">
               <Bar
