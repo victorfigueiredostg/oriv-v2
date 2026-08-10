@@ -11,6 +11,7 @@ import OrigemPizza from '@/components/dashboard/OrigemPizza'
 import CruzamentoTipoOrigem from '@/components/dashboard/CruzamentoTipoOrigem'
 import TendenciaAnual from '@/components/dashboard/TendenciaAnual'
 import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
+import { traduzirComoSoube } from '@/lib/labels'
 
 interface DashboardData {
   totalVisitas: number
@@ -58,6 +59,37 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [carregando, setCarregando] = useState(true)
 
+  // Modal de detalhamento ao clicar nos cards
+  const [detalheAberto, setDetalheAberto] = useState(false)
+  const [detalheTitulo, setDetalheTitulo] = useState('')
+  const [detalheVisitas, setDetalheVisitas] = useState<any[]>([])
+  const [detalheCarregando, setDetalheCarregando] = useState(false)
+
+  const abrirDetalhe = async (titulo: string, tipo?: string) => {
+    setDetalheTitulo(titulo)
+    setDetalheAberto(true)
+    setDetalheCarregando(true)
+    setDetalheVisitas([])
+    try {
+      const p = new URLSearchParams()
+      if (filtros.dataInicio) p.set('dataInicio', filtros.dataInicio)
+      if (filtros.dataFim) p.set('dataFim', filtros.dataFim)
+      if (filtros.empreendimentoId)
+        p.set('empreendimentoId', filtros.empreendimentoId)
+      if (filtros.comoSoube) p.set('comoSoube', filtros.comoSoube)
+      if (tipo) p.set('comoChegou', tipo)
+      else if (filtros.comoChegou) p.set('comoChegou', filtros.comoChegou)
+      p.set('limit', '1000')
+      const res = await fetch(`/api/visitas?${p.toString()}`)
+      const d = await res.json()
+      setDetalheVisitas(d.visitas || [])
+    } catch {
+      setDetalheVisitas([])
+    } finally {
+      setDetalheCarregando(false)
+    }
+  }
+
   useEffect(() => {
     const carregar = async () => {
       setCarregando(true)
@@ -99,7 +131,10 @@ export default function DashboardPage() {
         <div className="space-y-6">
           {/* Cartões-resumo */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div
+              onClick={() => abrirDetalhe('Total de visitas')}
+              className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow"
+            >
               <p className="text-sm font-medium text-gray-600">
                 Total de visitas
               </p>
@@ -107,7 +142,10 @@ export default function DashboardPage() {
                 {data.totalVisitas}
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div
+              onClick={() => abrirDetalhe('Agendados', 'AGENDADO_CORRETOR')}
+              className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow"
+            >
               <p className="text-sm font-medium text-gray-600">Agendados</p>
               <p className="text-4xl font-bold text-green-600 mt-2">
                 {agendados}
@@ -116,7 +154,10 @@ export default function DashboardPage() {
                 {pctTotal(agendados)}% do total
               </p>
             </div>
-            <div className="bg-white rounded-lg shadow-lg p-6">
+            <div
+              onClick={() => abrirDetalhe('Passantes', 'CLIENTE_PASSANTE')}
+              className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow"
+            >
               <p className="text-sm font-medium text-gray-600">Passantes</p>
               <p className="text-4xl font-bold text-orange-600 mt-2">
                 {passantes}
@@ -267,6 +308,86 @@ export default function DashboardPage() {
                   <p className="text-sm text-gray-500">Sem dados no período.</p>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {detalheAberto && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => setDetalheAberto(false)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900">
+                {detalheTitulo}
+                {!detalheCarregando ? ` (${detalheVisitas.length})` : ''}
+              </h3>
+              <button
+                onClick={() => setDetalheAberto(false)}
+                className="text-gray-400 hover:text-gray-700 text-2xl leading-none"
+                aria-label="Fechar"
+              >
+                ×
+              </button>
+            </div>
+            <div className="overflow-auto p-4">
+              {detalheCarregando ? (
+                <p className="text-gray-500">Carregando...</p>
+              ) : detalheVisitas.length === 0 ? (
+                <p className="text-gray-500">Nenhuma visita encontrada.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b-2 border-gray-200 sticky top-0">
+                    <tr>
+                      {[
+                        'Cliente',
+                        'Corretor',
+                        'Imobiliária',
+                        'Primeiro contato',
+                        'Onde mais viu',
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="px-3 py-2 text-left font-semibold text-gray-700 whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {detalheVisitas.map((v) => (
+                      <tr key={v.id} className="hover:bg-gray-50">
+                        <td className="px-3 py-2 font-medium text-gray-900">
+                          {v.nomeCliente}
+                        </td>
+                        <td className="px-3 py-2 text-gray-700" translate="no">
+                          {v.corretor}
+                        </td>
+                        <td className="px-3 py-2 text-gray-700" translate="no">
+                          {v.imobiliaria}
+                        </td>
+                        <td className="px-3 py-2 text-gray-700">
+                          {traduzirComoSoube(v.comoSoube)}
+                        </td>
+                        <td className="px-3 py-2 text-gray-700">
+                          {v.ondeMaisViu
+                            ? v.ondeMaisViu
+                                .split(',')
+                                .map((x: string) => traduzirComoSoube(x.trim()))
+                                .join(', ')
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
         </div>
