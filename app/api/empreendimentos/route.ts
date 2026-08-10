@@ -103,11 +103,21 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
 
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (
+      !session?.user ||
+      (session.user.role !== 'ADMIN' && session.user.role !== 'GESTOR')
+    ) {
       return NextResponse.json({ message: 'Não autorizado' }, { status: 403 })
     }
 
+    // GESTOR enxerga apenas o próprio empreendimento (usado no filtro do painel)
+    const escopo =
+      session.user.role === 'GESTOR' && session.user.empreendimentoId
+        ? { id: session.user.empreendimentoId }
+        : {}
+
     const empreendimentos = await prisma.empreendimento.findMany({
+      where: escopo,
       include: {
         _count: {
           select: {

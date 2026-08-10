@@ -9,9 +9,17 @@ export async function proxy(req: NextRequest) {
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET })
   const path = req.nextUrl.pathname
 
-  // Rotas que requerem ADMIN
-  if (path.startsWith('/admin') && !path.startsWith('/admin/login')) {
+  // Configurações e cadastro de empreendimentos: exclusivo de ADMIN
+  if (
+    path.startsWith('/admin/configuracoes') ||
+    path.startsWith('/admin/empreendimentos')
+  ) {
     if (token?.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/admin', req.url))
+    }
+  } else if (path.startsWith('/admin') && !path.startsWith('/admin/login')) {
+    // Demais telas do painel: ADMIN (visão global) ou GESTOR (1 empreendimento)
+    if (token?.role !== 'ADMIN' && token?.role !== 'GESTOR') {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
   }

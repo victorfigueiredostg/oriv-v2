@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { COMO_CHEGOU_OPTIONS, COMO_SOUBE_OPTIONS } from '@/lib/labels'
 
 export interface FiltrosVisitasValue {
@@ -41,6 +42,8 @@ const ctrlClass =
   'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900'
 
 export default function FiltrosVisitas({ value, onChange }: Props) {
+  const { data: session } = useSession()
+  const gestorRestrito = session?.user?.role === 'GESTOR'
   const [empreendimentos, setEmpreendimentos] = useState<EmpOption[]>([])
 
   useEffect(() => {
@@ -60,7 +63,11 @@ export default function FiltrosVisitas({ value, onChange }: Props) {
     onChange({ ...value, ...patch })
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <div
+      className={`bg-white rounded-lg shadow-sm p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 ${
+        gestorRestrito ? 'lg:grid-cols-4' : 'lg:grid-cols-5'
+      }`}
+    >
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Data início
@@ -87,23 +94,25 @@ export default function FiltrosVisitas({ value, onChange }: Props) {
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Empreendimento
-        </label>
-        <select
-          value={value.empreendimentoId}
-          onChange={(e) => set({ empreendimentoId: e.target.value })}
-          className={ctrlClass}
-        >
-          <option value="">Todos</option>
-          {empreendimentos.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.nome}
-            </option>
-          ))}
-        </select>
-      </div>
+      {!gestorRestrito && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Empreendimento
+          </label>
+          <select
+            value={value.empreendimentoId}
+            onChange={(e) => set({ empreendimentoId: e.target.value })}
+            className={ctrlClass}
+          >
+            <option value="">Todos</option>
+            {empreendimentos.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">

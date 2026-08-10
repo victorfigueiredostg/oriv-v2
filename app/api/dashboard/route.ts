@@ -34,8 +34,12 @@ export async function GET(request: NextRequest) {
     if (comoChegou) filtrosBase.comoChegou = comoChegou
     if (comoSoube) filtrosBase.comoSoube = comoSoube
 
-    // STAND: restrito ao próprio empreendimento. ADMIN: pode filtrar por um.
-    if (session.user.role === 'STAND' && session.user.empreendimentoId) {
+    // STAND/GESTOR: travados no próprio empreendimento (ignoram o parâmetro).
+    // ADMIN: visão global, pode filtrar por um empreendimento.
+    if (
+      (session.user.role === 'STAND' || session.user.role === 'GESTOR') &&
+      session.user.empreendimentoId
+    ) {
       filtrosBase.empreendimentoId = session.user.empreendimentoId
     } else if (session.user.role === 'ADMIN' && empreendimentoIdParam) {
       filtrosBase.empreendimentoId = parseInt(empreendimentoIdParam)

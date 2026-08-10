@@ -8,7 +8,10 @@ import { prisma } from '@/lib/prisma'
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || session.user.role !== 'ADMIN') {
+    if (
+      !session?.user ||
+      (session.user.role !== 'ADMIN' && session.user.role !== 'GESTOR')
+    ) {
       return NextResponse.json({ message: 'Não autorizado' }, { status: 403 })
     }
 
@@ -18,8 +21,12 @@ export async function GET(request: NextRequest) {
     const empreendimentoIdParam = searchParams.get('empreendimentoId')
 
     const where: any = {}
-    if (empreendimentoIdParam)
+    // GESTOR: travado no próprio empreendimento (ignora o parâmetro)
+    if (session.user.role === 'GESTOR' && session.user.empreendimentoId) {
+      where.empreendimentoId = session.user.empreendimentoId
+    } else if (empreendimentoIdParam) {
       where.empreendimentoId = parseInt(empreendimentoIdParam)
+    }
     if (dataInicioStr || dataFimStr) {
       where.salvoEm = {}
       if (dataInicioStr) where.salvoEm.gte = new Date(`${dataInicioStr}T00:00:00`)

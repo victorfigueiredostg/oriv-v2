@@ -35,21 +35,28 @@ export default function PainelLayout({
   const router = useRouter()
   const pathname = usePathname()
 
+  const role = session?.user?.role
+  const temAcesso = role === 'ADMIN' || role === 'GESTOR'
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/admin/login')
-    } else if (status === 'authenticated' && session?.user?.role !== 'ADMIN') {
+    } else if (status === 'authenticated' && !temAcesso) {
       router.push('/admin/login')
     }
-  }, [status, session, router])
+  }, [status, temAcesso, router])
 
-  if (status === 'loading' || !session || session.user?.role !== 'ADMIN') {
+  if (status === 'loading' || !session || !temAcesso) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="text-xl text-gray-700">Carregando...</div>
       </div>
     )
   }
+
+  // GESTOR (acesso restrito a 1 empreendimento) não enxerga Configurações
+  const navVisivel =
+    role === 'ADMIN' ? NAV : NAV.filter((i) => i.href !== '/admin/configuracoes')
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row">
@@ -60,7 +67,7 @@ export default function PainelLayout({
         </div>
 
         <nav className="flex md:flex-col flex-1 md:flex-none md:px-3 md:space-y-1">
-          {NAV.map((item) => {
+          {navVisivel.map((item) => {
             const ativo = item.match(pathname)
             return (
               <Link

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import GerenciarImobiliarias from '@/components/GerenciarImobiliarias'
+import GerenciarUsuarios from '@/components/GerenciarUsuarios'
 import ConfigApiCV from '@/components/ConfigApiCV'
 
 interface Empreendimento {
@@ -75,6 +76,8 @@ export default function ConfiguracoesPage() {
           + Novo Empreendimento
         </Link>
       </div>
+
+      <GerenciarUsuarios />
 
       <GerenciarImobiliarias />
 

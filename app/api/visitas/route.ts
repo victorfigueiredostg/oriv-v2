@@ -111,8 +111,11 @@ export async function GET(request: NextRequest) {
 
     const where: any = {}
 
-    // Se for STAND, filtrar apenas visitas do seu empreendimento
-    if (session.user.role === 'STAND' && session.user.empreendimentoId) {
+    // STAND/GESTOR: apenas visitas do seu empreendimento (ignoram parâmetro)
+    if (
+      (session.user.role === 'STAND' || session.user.role === 'GESTOR') &&
+      session.user.empreendimentoId
+    ) {
       where.empreendimentoId = session.user.empreendimentoId
     } else if (session.user.role === 'ADMIN') {
       // ADMIN pode filtrar por empreendimento e pelos campos da visita

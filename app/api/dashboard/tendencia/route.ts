@@ -23,8 +23,11 @@ export async function GET(request: NextRequest) {
         lte: new Date(`${ano}-12-31T23:59:59.999`),
       },
     }
-    // STAND restrito ao próprio empreendimento (admin vê tudo)
-    if (session.user.role === 'STAND' && session.user.empreendimentoId) {
+    // STAND/GESTOR restritos ao próprio empreendimento (admin vê tudo)
+    if (
+      (session.user.role === 'STAND' || session.user.role === 'GESTOR') &&
+      session.user.empreendimentoId
+    ) {
       where.empreendimentoId = session.user.empreendimentoId
     }
 

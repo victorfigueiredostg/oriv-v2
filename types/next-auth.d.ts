@@ -2,7 +2,7 @@ import 'next-auth'
 
 declare module 'next-auth' {
   interface User {
-    role: 'ADMIN' | 'STAND'
+    role: 'ADMIN' | 'STAND' | 'GESTOR'
     empreendimentoId: number | null
     empreendimento?: {
       id: number
@@ -17,7 +17,7 @@ declare module 'next-auth' {
     user: {
       id: string
       name: string
-      role: 'ADMIN' | 'STAND'
+      role: 'ADMIN' | 'STAND' | 'GESTOR'
       empreendimentoId: number | null
       empreendimento?: {
         id: number
@@ -32,7 +32,7 @@ declare module 'next-auth' {
 
 declare module 'next-auth/jwt' {
   interface JWT {
-    role: 'ADMIN' | 'STAND'
+    role: 'ADMIN' | 'STAND' | 'GESTOR'
     empreendimentoId: number | null
     empreendimento?: {
       id: number
