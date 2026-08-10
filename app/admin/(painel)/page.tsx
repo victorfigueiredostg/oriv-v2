@@ -196,13 +196,9 @@ export default function DashboardPage() {
 
           {/* Origem do Lead — abrange 1º contato + onde mais viu/ouviu */}
           <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
               Outros canais de Origem
             </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              Soma apenas das respostas de “onde mais viu/ouviu” (uma pessoa
-              pode marcar mais de uma).
-            </p>
             <OrigemPizza data={data.ondeMaisViuTotais} />
           </div>
 
