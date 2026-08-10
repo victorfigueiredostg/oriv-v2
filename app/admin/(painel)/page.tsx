@@ -9,6 +9,7 @@ import FiltrosVisitas, {
 import '@/components/charts/registrarChart'
 import OrigemPizza from '@/components/dashboard/OrigemPizza'
 import CruzamentoTipoOrigem from '@/components/dashboard/CruzamentoTipoOrigem'
+import CruzamentoContatoOnde from '@/components/dashboard/CruzamentoContatoOnde'
 import TendenciaAnual from '@/components/dashboard/TendenciaAnual'
 import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
 import { traduzirComoSoube } from '@/lib/labels'
@@ -19,6 +20,11 @@ interface DashboardData {
   crescimento: { atual: number; anterior: number; percentual: number }
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
   ondeMaisViuTotais: { comoSoube: string; _count: number }[]
+  cruzamentoContatoOnde: {
+    primeiroContato: string
+    total: number
+    canais: { canal: string; total: number }[]
+  }[]
   topCorretores: { corretor: string; imobiliaria: string; _count: number }[]
   topImobiliarias: { imobiliaria: string; _count: number }[]
   rankEmpreendimentos: { nome: string; total: number }[]
@@ -200,6 +206,14 @@ export default function DashboardPage() {
               Outros canais de Origem
             </h2>
             <OrigemPizza data={data.ondeMaisViuTotais} />
+          </div>
+
+          {/* Cruzamento: primeiro contato x outros canais */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Primeiro contato × Outros canais
+            </h2>
+            <CruzamentoContatoOnde data={data.cruzamentoContatoOnde} />
           </div>
 
           {/* Cruzamento Tipo de Visita x Origem */}

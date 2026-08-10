@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
     // no fuso de Brasília (America/Sao_Paulo), a partir dos salvoEm filtrados.
     const linhas = await prisma.visita.findMany({
       where,
-      select: { salvoEm: true, ondeMaisViu: true },
+      select: { salvoEm: true, comoSoube: true, ondeMaisViu: true },
     })
 
     const fmtData = new Intl.DateTimeFormat('en-CA', {
@@ -204,8 +204,13 @@ export async function GET(request: NextRequest) {
     // "Outros canais de origem": SOMENTE as respostas de "onde mais viu/ouviu"
     const ondeMaisMap = new Map<string, number>()
     const inc = (k: string) => ondeMaisMap.set(k, (ondeMaisMap.get(k) || 0) + 1)
+    // Cruzamento: por primeiro contato (comoSoube), quais outros canais viu
+    const crossMap = new Map<
+      string,
+      { total: number; canais: Map<string, number> }
+    >()
 
-    for (const { salvoEm, ondeMaisViu } of linhas) {
+    for (const { salvoEm, comoSoube, ondeMaisViu } of linhas) {
       const dia = fmtData.format(salvoEm) // YYYY-MM-DD
       serieMap.set(dia, (serieMap.get(dia) || 0) + 1)
 
@@ -217,10 +222,23 @@ export async function GET(request: NextRequest) {
       matriz[di][h]++
       totaisDia[di]++
 
-      if (ondeMaisViu) {
-        for (const v of ondeMaisViu.split(',')) {
-          const t = v.trim()
-          if (t) inc(t)
+      const canaisDaVisita = ondeMaisViu
+        ? ondeMaisViu
+            .split(',')
+            .map((v) => v.trim())
+            .filter(Boolean)
+        : []
+      for (const t of canaisDaVisita) inc(t)
+
+      if (comoSoube) {
+        let c = crossMap.get(comoSoube)
+        if (!c) {
+          c = { total: 0, canais: new Map() }
+          crossMap.set(comoSoube, c)
+        }
+        c.total++
+        for (const t of canaisDaVisita) {
+          c.canais.set(t, (c.canais.get(t) || 0) + 1)
         }
       }
     }
@@ -232,6 +250,16 @@ export async function GET(request: NextRequest) {
     const ondeMaisViuTotais = [...ondeMaisMap.entries()]
       .map(([comoSoube, _count]) => ({ comoSoube, _count }))
       .sort((a, b) => b._count - a._count)
+
+    const cruzamentoContatoOnde = [...crossMap.entries()]
+      .map(([primeiroContato, c]) => ({
+        primeiroContato,
+        total: c.total,
+        canais: [...c.canais.entries()]
+          .map(([canal, total]) => ({ canal, total }))
+          .sort((a, b) => b.total - a.total),
+      }))
+      .sort((a, b) => b.total - a.total)
 
     // Indicador de crescimento vs período anterior
     const percentual =
@@ -252,6 +280,7 @@ export async function GET(request: NextRequest) {
       visitasPorComoChegou,
       visitasPorComoSoube,
       ondeMaisViuTotais,
+      cruzamentoContatoOnde,
       topCorretores,
       topImobiliarias,
       rankEmpreendimentos,
