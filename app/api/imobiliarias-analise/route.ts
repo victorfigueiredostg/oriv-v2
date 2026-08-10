@@ -41,7 +41,10 @@ export async function GET(request: NextRequest) {
           corretor: true,
           comoChegou: true,
           empreendimentoId: true,
+          nomeCliente: true,
+          salvoEm: true,
         },
+        orderBy: { salvoEm: 'desc' },
       }),
       prisma.empreendimento.findMany({ select: { id: true, nome: true } }),
     ])
@@ -53,12 +56,20 @@ export async function GET(request: NextRequest) {
       agendados: number
       passantes: number
     }
+    interface ClienteRow {
+      nomeCliente: string
+      corretor: string
+      empreendimento: string
+      comoChegou: string
+      salvoEm: Date
+    }
     interface Agg {
       total: number
       agendados: number
       passantes: number
       corretores: Map<string, number>
       empreend: Map<number, EmpAgg>
+      clientes: ClienteRow[]
     }
     const mapa = new Map<string, Agg>()
     for (const v of linhas) {
@@ -71,6 +82,7 @@ export async function GET(request: NextRequest) {
           passantes: 0,
           corretores: new Map(),
           empreend: new Map(),
+          clientes: [],
         } as Agg)
       const agendado = v.comoChegou === 'AGENDADO_CORRETOR'
       const passante = v.comoChegou === 'CLIENTE_PASSANTE'
@@ -86,6 +98,14 @@ export async function GET(request: NextRequest) {
       if (agendado) e.agendados++
       else if (passante) e.passantes++
       a.empreend.set(v.empreendimentoId, e)
+      // linhas já vêm ordenadas por salvoEm desc, então a lista preserva a ordem
+      a.clientes.push({
+        nomeCliente: v.nomeCliente,
+        corretor: v.corretor,
+        empreendimento: nomeEmp[v.empreendimentoId] || `#${v.empreendimentoId}`,
+        comoChegou: v.comoChegou,
+        salvoEm: v.salvoEm,
+      })
       mapa.set(imob, a)
     }
 
@@ -107,6 +127,7 @@ export async function GET(request: NextRequest) {
             passantes: e.passantes,
           }))
           .sort((x, y) => y.total - x.total),
+        clientes: a.clientes,
       }))
       .sort((x, y) => y.total - x.total)
 

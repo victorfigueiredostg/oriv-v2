@@ -26,6 +26,13 @@ interface ImobAnalise {
     agendados: number
     passantes: number
   }[]
+  clientes: {
+    nomeCliente: string
+    corretor: string
+    empreendimento: string
+    comoChegou: string
+    salvoEm: string
+  }[]
 }
 interface Dados {
   totalGeral: number
@@ -355,6 +362,65 @@ export default function ImobiliariasPage() {
                                       </td>
                                       <td className="py-1 px-2 text-center font-medium text-gray-900">
                                         {e.passantes}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          <div className="mt-6">
+                            <h4 className="font-semibold text-gray-800 mb-2">
+                              Clientes ({im.clientes.length})
+                            </h4>
+                            <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="text-gray-500 border-b border-gray-200 bg-gray-100">
+                                    <th className="text-left font-medium py-2 px-3">
+                                      Cliente
+                                    </th>
+                                    <th className="text-left font-medium py-2 px-3">
+                                      Corretor
+                                    </th>
+                                    <th className="text-left font-medium py-2 px-3">
+                                      Empreendimento
+                                    </th>
+                                    <th className="text-left font-medium py-2 px-3">
+                                      Tipo
+                                    </th>
+                                    <th className="text-left font-medium py-2 px-3">
+                                      Data/Hora
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {im.clientes.map((c, ci) => (
+                                    <tr
+                                      key={ci}
+                                      className="border-b border-gray-100 last:border-0"
+                                    >
+                                      <td
+                                        className="py-2 px-3 font-medium text-gray-900"
+                                        translate="no"
+                                      >
+                                        {c.nomeCliente}
+                                      </td>
+                                      <td
+                                        className="py-2 px-3 text-gray-700"
+                                        translate="no"
+                                      >
+                                        {c.corretor}
+                                      </td>
+                                      <td className="py-2 px-3 text-gray-700">
+                                        {c.empreendimento}
+                                      </td>
+                                      <td className="py-2 px-3 text-gray-700">
+                                        {traduzirComoChegou(c.comoChegou)}
+                                      </td>
+                                      <td className="py-2 px-3 text-gray-500 whitespace-nowrap">
+                                        {formatarDataHora(c.salvoEm)}
                                       </td>
                                     </tr>
                                   ))}
