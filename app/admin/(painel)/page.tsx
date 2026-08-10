@@ -18,7 +18,7 @@ interface DashboardData {
   mediaIdade: { media: number | null; qtd: number }
   crescimento: { atual: number; anterior: number; percentual: number }
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
-  origensTotais: { comoSoube: string; _count: number }[]
+  ondeMaisViuTotais: { comoSoube: string; _count: number }[]
   topCorretores: { corretor: string; imobiliaria: string; _count: number }[]
   topImobiliarias: { imobiliaria: string; _count: number }[]
   rankEmpreendimentos: { nome: string; total: number }[]
@@ -197,13 +197,13 @@ export default function DashboardPage() {
           {/* Origem do Lead — abrange 1º contato + onde mais viu/ouviu */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-1">
-              Origem do Lead
+              Outros canais de Origem
             </h2>
             <p className="text-sm text-gray-500 mb-4">
-              Considera o primeiro contato e todas as respostas de “onde mais
-              viu/ouviu”.
+              Soma apenas das respostas de “onde mais viu/ouviu” (uma pessoa
+              pode marcar mais de uma).
             </p>
-            <OrigemPizza data={data.origensTotais} />
+            <OrigemPizza data={data.ondeMaisViuTotais} />
           </div>
 
           {/* Cruzamento Tipo de Visita x Origem */}

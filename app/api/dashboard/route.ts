@@ -173,7 +173,7 @@ export async function GET(request: NextRequest) {
     // no fuso de Brasília (America/Sao_Paulo), a partir dos salvoEm filtrados.
     const linhas = await prisma.visita.findMany({
       where,
-      select: { salvoEm: true, comoSoube: true, ondeMaisViu: true },
+      select: { salvoEm: true, ondeMaisViu: true },
     })
 
     const fmtData = new Intl.DateTimeFormat('en-CA', {
@@ -201,11 +201,11 @@ export async function GET(request: NextRequest) {
     const serieMap = new Map<string, number>()
     const matriz = Array.from({ length: 7 }, () => new Array<number>(24).fill(0))
     const totaisDia = new Array<number>(7).fill(0)
-    // "Origem do lead" abrangente: 1º contato (comoSoube) + onde mais viu/ouviu
-    const origensMap = new Map<string, number>()
-    const inc = (k: string) => origensMap.set(k, (origensMap.get(k) || 0) + 1)
+    // "Outros canais de origem": SOMENTE as respostas de "onde mais viu/ouviu"
+    const ondeMaisMap = new Map<string, number>()
+    const inc = (k: string) => ondeMaisMap.set(k, (ondeMaisMap.get(k) || 0) + 1)
 
-    for (const { salvoEm, comoSoube, ondeMaisViu } of linhas) {
+    for (const { salvoEm, ondeMaisViu } of linhas) {
       const dia = fmtData.format(salvoEm) // YYYY-MM-DD
       serieMap.set(dia, (serieMap.get(dia) || 0) + 1)
 
@@ -217,7 +217,6 @@ export async function GET(request: NextRequest) {
       matriz[di][h]++
       totaisDia[di]++
 
-      if (comoSoube) inc(comoSoube)
       if (ondeMaisViu) {
         for (const v of ondeMaisViu.split(',')) {
           const t = v.trim()
@@ -230,7 +229,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([dia, total]) => ({ dia, total }))
 
-    const origensTotais = [...origensMap.entries()]
+    const ondeMaisViuTotais = [...ondeMaisMap.entries()]
       .map(([comoSoube, _count]) => ({ comoSoube, _count }))
       .sort((a, b) => b._count - a._count)
 
@@ -252,7 +251,7 @@ export async function GET(request: NextRequest) {
       },
       visitasPorComoChegou,
       visitasPorComoSoube,
-      origensTotais,
+      ondeMaisViuTotais,
       topCorretores,
       topImobiliarias,
       rankEmpreendimentos,
