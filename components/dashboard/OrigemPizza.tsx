@@ -32,7 +32,11 @@ export default function OrigemPizza({ data }: { data: Item[] }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-      <div className="max-w-[260px] mx-auto w-full">
+      <div className="relative max-w-[260px] mx-auto w-full">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <span className="text-3xl font-bold text-gray-900">{total}</span>
+          <span className="text-xs text-gray-500">total</span>
+        </div>
         <Doughnut
           data={chartData}
           plugins={[ChartDataLabels]}
