@@ -39,6 +39,122 @@ interface Dados {
   imobiliarias: ImobAnalise[]
 }
 
+// Tabela de clientes de uma imobiliária, com filtros por corretor e
+// empreendimento. Recebe `key` da imobiliária para resetar ao trocar de linha.
+function TabelaClientes({ clientes }: { clientes: ImobAnalise['clientes'] }) {
+  const [fCorretor, setFCorretor] = useState('')
+  const [fEmp, setFEmp] = useState('')
+
+  const corretores = [...new Set(clientes.map((c) => c.corretor))].sort()
+  const empreendimentos = [
+    ...new Set(clientes.map((c) => c.empreendimento)),
+  ].sort()
+
+  const filtrados = clientes.filter(
+    (c) =>
+      (!fCorretor || c.corretor === fCorretor) &&
+      (!fEmp || c.empreendimento === fEmp)
+  )
+
+  const selClass =
+    'px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 bg-white'
+
+  return (
+    <div className="mt-6">
+      <div className="flex flex-wrap items-center gap-3 mb-2">
+        <h4 className="font-semibold text-gray-800">
+          Clientes ({filtrados.length})
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          <select
+            value={fCorretor}
+            onChange={(e) => setFCorretor(e.target.value)}
+            className={selClass}
+          >
+            <option value="">Todos os corretores</option>
+            {corretores.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fEmp}
+            onChange={(e) => setFEmp(e.target.value)}
+            className={selClass}
+          >
+            <option value="">Todos os empreendimentos</option>
+            {empreendimentos.map((e) => (
+              <option key={e} value={e}>
+                {e}
+              </option>
+            ))}
+          </select>
+          {(fCorretor || fEmp) && (
+            <button
+              onClick={() => {
+                setFCorretor('')
+                setFEmp('')
+              }}
+              className="px-3 py-2 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+            >
+              Limpar
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-gray-500 border-b border-gray-200 bg-gray-100">
+              <th className="text-left font-medium py-2 px-3">Cliente</th>
+              <th className="text-left font-medium py-2 px-3">Corretor</th>
+              <th className="text-left font-medium py-2 px-3">Empreendimento</th>
+              <th className="text-left font-medium py-2 px-3">Tipo</th>
+              <th className="text-left font-medium py-2 px-3">Data/Hora</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtrados.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-4 px-3 text-center text-gray-500">
+                  Nenhum cliente para os filtros selecionados.
+                </td>
+              </tr>
+            ) : (
+              filtrados.map((c, ci) => (
+                <tr
+                  key={ci}
+                  className="border-b border-gray-100 last:border-0"
+                >
+                  <td
+                    className="py-2 px-3 font-medium text-gray-900"
+                    translate="no"
+                  >
+                    {c.nomeCliente}
+                  </td>
+                  <td className="py-2 px-3 text-gray-700" translate="no">
+                    {c.corretor}
+                  </td>
+                  <td className="py-2 px-3 text-gray-700">
+                    {c.empreendimento}
+                  </td>
+                  <td className="py-2 px-3 text-gray-700">
+                    {traduzirComoChegou(c.comoChegou)}
+                  </td>
+                  <td className="py-2 px-3 text-gray-500 whitespace-nowrap">
+                    {formatarDataHora(c.salvoEm)}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
 export default function ImobiliariasPage() {
   const [filtros, setFiltros] = useState<FiltrosVisitasValue>(filtrosPadrao)
   const [dados, setDados] = useState<Dados | null>(null)
@@ -370,64 +486,7 @@ export default function ImobiliariasPage() {
                             </div>
                           </div>
 
-                          <div className="mt-6">
-                            <h4 className="font-semibold text-gray-800 mb-2">
-                              Clientes ({im.clientes.length})
-                            </h4>
-                            <div className="overflow-x-auto bg-white rounded-lg border border-gray-200">
-                              <table className="w-full text-sm">
-                                <thead>
-                                  <tr className="text-gray-500 border-b border-gray-200 bg-gray-100">
-                                    <th className="text-left font-medium py-2 px-3">
-                                      Cliente
-                                    </th>
-                                    <th className="text-left font-medium py-2 px-3">
-                                      Corretor
-                                    </th>
-                                    <th className="text-left font-medium py-2 px-3">
-                                      Empreendimento
-                                    </th>
-                                    <th className="text-left font-medium py-2 px-3">
-                                      Tipo
-                                    </th>
-                                    <th className="text-left font-medium py-2 px-3">
-                                      Data/Hora
-                                    </th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {im.clientes.map((c, ci) => (
-                                    <tr
-                                      key={ci}
-                                      className="border-b border-gray-100 last:border-0"
-                                    >
-                                      <td
-                                        className="py-2 px-3 font-medium text-gray-900"
-                                        translate="no"
-                                      >
-                                        {c.nomeCliente}
-                                      </td>
-                                      <td
-                                        className="py-2 px-3 text-gray-700"
-                                        translate="no"
-                                      >
-                                        {c.corretor}
-                                      </td>
-                                      <td className="py-2 px-3 text-gray-700">
-                                        {c.empreendimento}
-                                      </td>
-                                      <td className="py-2 px-3 text-gray-700">
-                                        {traduzirComoChegou(c.comoChegou)}
-                                      </td>
-                                      <td className="py-2 px-3 text-gray-500 whitespace-nowrap">
-                                        {formatarDataHora(c.salvoEm)}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
+                          <TabelaClientes key={im.nome} clientes={im.clientes} />
                         </td>
                       </tr>
                     )}
