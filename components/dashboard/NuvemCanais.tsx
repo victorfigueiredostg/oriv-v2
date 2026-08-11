@@ -16,8 +16,8 @@ interface Props {
   outrosCanais: Item[]
 }
 
-// Nuvem de palavras dos canais: quanto mais respostas um canal tem, maior a
-// palavra. Sem biblioteca externa — só escala de fonte proporcional à contagem.
+// Cada canal é uma bolha; o diâmetro é proporcional à quantidade (área ∝
+// contagem, via raiz quadrada). Bolhas lado a lado para ver o todo.
 export default function NuvemCanais({ primeiroContato, outrosCanais }: Props) {
   const [fonte, setFonte] = useState<Fonte>('primeiro')
 
@@ -40,13 +40,12 @@ export default function NuvemCanais({ primeiroContato, outrosCanais }: Props) {
   }, [fonte, primeiroContato, outrosCanais])
 
   const max = dados.length ? dados[0].total : 0
-  const min = dados.length ? dados[dados.length - 1].total : 0
 
-  // Escala de fonte: menor 15px, maior 54px (proporcional à contagem)
-  const tamanho = (n: number) => {
-    if (max === min) return 30
-    const t = (n - min) / (max - min)
-    return Math.round(15 + t * 39)
+  // Diâmetro 56px..168px, escalado pela raiz (área proporcional à contagem)
+  const diametro = (n: number) => {
+    if (!max) return 56
+    const t = Math.sqrt(n) / Math.sqrt(max)
+    return Math.round(56 + t * 112)
   }
 
   const btn = (f: Fonte, label: string) => (
@@ -73,36 +72,42 @@ export default function NuvemCanais({ primeiroContato, outrosCanais }: Props) {
       {dados.length === 0 ? (
         <p className="text-sm text-gray-500">Sem dados no período.</p>
       ) : (
-        <div className="flex justify-center">
-          <div className="relative w-full max-w-lg aspect-square rounded-full bg-gradient-to-br from-indigo-50 to-slate-100 border border-slate-200 flex flex-wrap items-center justify-center content-center gap-x-4 gap-y-1 p-12 overflow-hidden">
-            {dados.map((d, i) => {
-              const sz = tamanho(d.total)
-              // opacidade sutil: canais menores ficam levemente mais claros
-              const op = max === min ? 1 : 0.55 + 0.45 * (d.total / max)
-              return (
+        <div className="flex flex-wrap items-center justify-center gap-4 py-4">
+          {dados.map((d, i) => {
+            const size = diametro(d.total)
+            const fonteRotulo = Math.max(10, Math.min(16, Math.round(size * 0.15)))
+            return (
+              <div
+                key={d.comoSoube}
+                title={`${traduzirComoSoube(d.comoSoube)}: ${d.total}`}
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: PALETA[i % PALETA.length],
+                }}
+                className="rounded-full flex flex-col items-center justify-center text-center text-white shadow-sm shrink-0 p-2"
+              >
                 <span
-                  key={d.comoSoube}
-                  title={`${traduzirComoSoube(d.comoSoube)}: ${d.total}`}
-                  style={{
-                    fontSize: `${sz}px`,
-                    lineHeight: 1.05,
-                    color: PALETA[i % PALETA.length],
-                    opacity: op,
-                    fontWeight: sz >= 34 ? 800 : sz >= 24 ? 700 : 600,
-                  }}
-                  className="whitespace-nowrap"
+                  style={{ fontSize: fonteRotulo, lineHeight: 1.1 }}
+                  className="font-semibold break-words"
                 >
                   {traduzirComoSoube(d.comoSoube)}
                 </span>
-              )
-            })}
-          </div>
+                <span
+                  style={{ fontSize: fonteRotulo + 3 }}
+                  className="font-extrabold"
+                >
+                  {d.total}
+                </span>
+              </div>
+            )
+          })}
         </div>
       )}
 
       {dados.length > 0 && (
-        <p className="text-xs text-gray-400 text-center mt-3">
-          O tamanho da palavra é proporcional à quantidade de respostas do canal.
+        <p className="text-xs text-gray-400 text-center mt-2">
+          O tamanho do círculo é proporcional à quantidade de respostas do canal.
         </p>
       )}
     </div>
