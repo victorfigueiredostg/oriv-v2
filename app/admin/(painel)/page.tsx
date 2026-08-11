@@ -13,7 +13,7 @@ import CruzamentoContatoOnde from '@/components/dashboard/CruzamentoContatoOnde'
 import NuvemCanais from '@/components/dashboard/NuvemCanais'
 import TendenciaAnual from '@/components/dashboard/TendenciaAnual'
 import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
-import { traduzirComoSoube } from '@/lib/labels'
+import { traduzirComoSoube, formatarDataHora } from '@/lib/labels'
 
 interface DashboardData {
   totalVisitas: number
@@ -372,9 +372,11 @@ export default function DashboardPage() {
                   <thead className="bg-gray-50 border-b-2 border-gray-200 sticky top-0">
                     <tr>
                       {[
+                        'Data/Hora',
                         'Cliente',
                         'Corretor',
                         'Imobiliária',
+                        'Empreendimento',
                         'Primeiro contato',
                         'Onde mais viu',
                       ].map((h) => (
@@ -390,6 +392,9 @@ export default function DashboardPage() {
                   <tbody className="divide-y divide-gray-200">
                     {detalheVisitas.map((v) => (
                       <tr key={v.id} className="hover:bg-gray-50">
+                        <td className="px-3 py-2 text-gray-500 whitespace-nowrap">
+                          {formatarDataHora(v.salvoEm)}
+                        </td>
                         <td className="px-3 py-2 font-medium text-gray-900">
                           {v.nomeCliente}
                         </td>
@@ -398,6 +403,9 @@ export default function DashboardPage() {
                         </td>
                         <td className="px-3 py-2 text-gray-700" translate="no">
                           {v.imobiliaria}
+                        </td>
+                        <td className="px-3 py-2 text-gray-700">
+                          {v.empreendimento?.nome || '—'}
                         </td>
                         <td className="px-3 py-2 text-gray-700">
                           {traduzirComoSoube(v.comoSoube)}
