@@ -217,15 +217,20 @@ export default function DashboardPage() {
             <CruzamentoContatoOnde data={data.cruzamentoContatoOnde} />
           </div>
 
-          {/* Nuvem de canais — tamanho proporcional à quantidade */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Nuvem de canais
-            </h2>
-            <NuvemCanais
-              primeiroContato={data.visitasPorComoSoube}
-              outrosCanais={data.ondeMaisViuTotais}
-            />
+          {/* Nuvem de canais — palavra maior = mais respostas */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Primeiro contato
+              </h2>
+              <NuvemCanais data={data.visitasPorComoSoube} />
+            </div>
+            <div className="bg-white rounded-lg shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">
+                Outros canais
+              </h2>
+              <NuvemCanais data={data.ondeMaisViuTotais} />
+            </div>
           </div>
 
           {/* Cruzamento Tipo de Visita x Origem */}

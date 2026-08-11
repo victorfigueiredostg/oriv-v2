@@ -1,6 +1,5 @@
 'use client'
 
-import { useMemo, useState } from 'react'
 import { PALETA } from '@/components/charts/registrarChart'
 import { traduzirComoSoube } from '@/lib/labels'
 
@@ -9,107 +8,49 @@ interface Item {
   _count: number
 }
 
-type Fonte = 'primeiro' | 'outros' | 'todos'
+// Nuvem de palavras: cada canal é uma palavra agrupada com as demais, com o
+// tamanho da fonte proporcional à quantidade de respostas.
+export default function NuvemCanais({ data }: { data: Item[] }) {
+  const dados = [...data]
+    .filter((d) => d._count > 0)
+    .sort((a, b) => b._count - a._count)
 
-interface Props {
-  primeiroContato: Item[]
-  outrosCanais: Item[]
-}
-
-// Cada canal é uma bolha; o diâmetro é proporcional à quantidade (área ∝
-// contagem, via raiz quadrada). Bolhas lado a lado para ver o todo.
-export default function NuvemCanais({ primeiroContato, outrosCanais }: Props) {
-  const [fonte, setFonte] = useState<Fonte>('primeiro')
-
-  const dados = useMemo(() => {
-    const soma = new Map<string, number>()
-    const add = (arr: Item[]) => {
-      for (const i of arr)
-        soma.set(i.comoSoube, (soma.get(i.comoSoube) || 0) + i._count)
-    }
-    if (fonte === 'primeiro') add(primeiroContato)
-    else if (fonte === 'outros') add(outrosCanais)
-    else {
-      add(primeiroContato)
-      add(outrosCanais)
-    }
-    return [...soma.entries()]
-      .map(([comoSoube, total]) => ({ comoSoube, total }))
-      .filter((d) => d.total > 0)
-      .sort((a, b) => b.total - a.total)
-  }, [fonte, primeiroContato, outrosCanais])
-
-  const max = dados.length ? dados[0].total : 0
-
-  // Diâmetro 56px..168px, escalado pela raiz (área proporcional à contagem)
-  const diametro = (n: number) => {
-    if (!max) return 56
-    const t = Math.sqrt(n) / Math.sqrt(max)
-    return Math.round(56 + t * 112)
+  if (dados.length === 0) {
+    return <p className="text-sm text-gray-500">Sem dados no período.</p>
   }
 
-  const btn = (f: Fonte, label: string) => (
-    <button
-      onClick={() => setFonte(f)}
-      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-        fonte === f
-          ? 'bg-indigo-600 text-white'
-          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-      }`}
-    >
-      {label}
-    </button>
-  )
+  const max = dados[0]._count
+  const min = dados[dados.length - 1]._count
+
+  // Escala de fonte: menor 15px, maior 46px (proporcional à contagem)
+  const tamanho = (n: number) => {
+    if (max === min) return 26
+    const t = (n - min) / (max - min)
+    return Math.round(15 + t * 31)
+  }
 
   return (
-    <div>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {btn('primeiro', 'Primeiro contato')}
-        {btn('outros', 'Outros canais')}
-        {btn('todos', 'Todos')}
-      </div>
-
-      {dados.length === 0 ? (
-        <p className="text-sm text-gray-500">Sem dados no período.</p>
-      ) : (
-        <div className="flex flex-wrap items-center justify-center gap-4 py-4">
-          {dados.map((d, i) => {
-            const size = diametro(d.total)
-            const fonteRotulo = Math.max(10, Math.min(16, Math.round(size * 0.15)))
-            return (
-              <div
-                key={d.comoSoube}
-                title={`${traduzirComoSoube(d.comoSoube)}: ${d.total}`}
-                style={{
-                  width: size,
-                  height: size,
-                  backgroundColor: PALETA[i % PALETA.length],
-                }}
-                className="rounded-full flex flex-col items-center justify-center text-center text-white shadow-sm shrink-0 p-2"
-              >
-                <span
-                  style={{ fontSize: fonteRotulo, lineHeight: 1.1 }}
-                  className="font-semibold break-words"
-                >
-                  {traduzirComoSoube(d.comoSoube)}
-                </span>
-                <span
-                  style={{ fontSize: fonteRotulo + 3 }}
-                  className="font-extrabold"
-                >
-                  {d.total}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      )}
-
-      {dados.length > 0 && (
-        <p className="text-xs text-gray-400 text-center mt-2">
-          O tamanho do círculo é proporcional à quantidade de respostas do canal.
-        </p>
-      )}
+    <div className="flex flex-wrap items-center justify-center content-center gap-x-4 gap-y-2 min-h-[220px] py-4">
+      {dados.map((d, i) => {
+        const sz = tamanho(d._count)
+        const op = max === min ? 1 : 0.55 + 0.45 * (d._count / max)
+        return (
+          <span
+            key={d.comoSoube}
+            title={`${traduzirComoSoube(d.comoSoube)}: ${d._count}`}
+            style={{
+              fontSize: `${sz}px`,
+              lineHeight: 1.05,
+              color: PALETA[i % PALETA.length],
+              opacity: op,
+              fontWeight: sz >= 32 ? 800 : sz >= 23 ? 700 : 600,
+            }}
+            className="whitespace-nowrap"
+          >
+            {traduzirComoSoube(d.comoSoube)}
+          </span>
+        )
+      })}
     </div>
   )
 }
