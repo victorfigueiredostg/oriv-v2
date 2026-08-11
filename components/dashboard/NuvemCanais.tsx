@@ -8,8 +8,9 @@ interface Item {
   _count: number
 }
 
-// Nuvem de palavras: cada canal é uma palavra agrupada com as demais, com o
-// tamanho da fonte proporcional à quantidade de respostas.
+// Cada canal é um círculo com área proporcional à quantidade (via raiz
+// quadrada), com o número dentro e o nome embaixo. Ordenados do maior para o
+// menor para deixar claro qual canal lidera.
 export default function NuvemCanais({ data }: { data: Item[] }) {
   const dados = [...data]
     .filter((d) => d._count > 0)
@@ -20,40 +21,40 @@ export default function NuvemCanais({ data }: { data: Item[] }) {
   }
 
   const max = dados[0]._count
-  const min = dados[dados.length - 1]._count
 
-  // Escala de fonte pela contagem (14px..34px) com um teto por largura: rótulos
-  // longos têm a fonte reduzida para caberem em uma linha dentro do card.
-  const LARGURA_CHAR_EM = 0.6 // aprox. da largura média de um caractere (bold)
-  const ORCAMENTO_PX = 300 // largura útil conservadora do card
-  const tamanho = (n: number, len: number) => {
-    const base =
-      max === min ? 24 : Math.round(14 + ((n - min) / (max - min)) * 20)
-    const capLargura = Math.floor(ORCAMENTO_PX / (len * LARGURA_CHAR_EM))
-    return Math.max(13, Math.min(base, capLargura))
+  // Diâmetro 44px..120px, escalado pela raiz (área ∝ contagem)
+  const diametro = (n: number) => {
+    const t = Math.sqrt(n) / Math.sqrt(max)
+    return Math.round(44 + t * 76)
   }
 
   return (
-    <div className="flex flex-wrap items-center justify-center content-center gap-x-4 gap-y-2 min-h-[220px] py-4 w-full overflow-hidden">
+    <div className="flex flex-wrap items-end justify-center gap-x-5 gap-y-5 py-4">
       {dados.map((d, i) => {
+        const size = diametro(d._count)
         const rotulo = traduzirComoSoube(d.comoSoube)
-        const sz = tamanho(d._count, rotulo.length)
-        const op = max === min ? 1 : 0.55 + 0.45 * (d._count / max)
         return (
-          <span
+          <div
             key={d.comoSoube}
-            title={`${rotulo}: ${d._count}`}
-            style={{
-              fontSize: `${sz}px`,
-              lineHeight: 1.1,
-              color: PALETA[i % PALETA.length],
-              opacity: op,
-              fontWeight: sz >= 30 ? 800 : sz >= 22 ? 700 : 600,
-            }}
-            className="whitespace-nowrap max-w-full"
+            className="flex flex-col items-center gap-1.5"
+            style={{ width: Math.max(size, 72) }}
           >
-            {rotulo}
-          </span>
+            <div
+              title={`${rotulo}: ${d._count}`}
+              style={{
+                width: size,
+                height: size,
+                backgroundColor: PALETA[i % PALETA.length],
+                fontSize: Math.max(13, Math.round(size * 0.34)),
+              }}
+              className="rounded-full flex items-center justify-center text-white font-extrabold shadow-sm shrink-0"
+            >
+              {d._count}
+            </div>
+            <span className="text-xs text-gray-700 text-center leading-tight break-words">
+              {rotulo}
+            </span>
+          </div>
         )
       })}
     </div>
