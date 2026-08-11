@@ -10,6 +10,7 @@ import '@/components/charts/registrarChart'
 import OrigemPizza from '@/components/dashboard/OrigemPizza'
 import CruzamentoTipoOrigem from '@/components/dashboard/CruzamentoTipoOrigem'
 import CruzamentoContatoOnde from '@/components/dashboard/CruzamentoContatoOnde'
+import NuvemCanais from '@/components/dashboard/NuvemCanais'
 import TendenciaAnual from '@/components/dashboard/TendenciaAnual'
 import HeatmapDiaHora from '@/components/dashboard/HeatmapDiaHora'
 import { traduzirComoSoube } from '@/lib/labels'
@@ -214,6 +215,17 @@ export default function DashboardPage() {
               Primeiro contato × Outros canais
             </h2>
             <CruzamentoContatoOnde data={data.cruzamentoContatoOnde} />
+          </div>
+
+          {/* Nuvem de canais — tamanho proporcional à quantidade */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Nuvem de canais
+            </h2>
+            <NuvemCanais
+              primeiroContato={data.visitasPorComoSoube}
+              outrosCanais={data.ondeMaisViuTotais}
+            />
           </div>
 
           {/* Cruzamento Tipo de Visita x Origem */}
