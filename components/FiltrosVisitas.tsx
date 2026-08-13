@@ -10,6 +10,7 @@ export interface FiltrosVisitasValue {
   comoChegou: string // '' = todos
   comoSoube: string // '' = todas
   empreendimentoId: string // '' = todos
+  imobiliaria: string // '' = todas (nome exato)
 }
 
 const dataISO = (d: Date) => d.toISOString().slice(0, 10)
@@ -25,6 +26,7 @@ export function filtrosPadrao(): FiltrosVisitasValue {
     comoChegou: '',
     comoSoube: '',
     empreendimentoId: '',
+    imobiliaria: '',
   }
 }
 
@@ -36,15 +38,29 @@ interface EmpOption {
 interface Props {
   value: FiltrosVisitasValue
   onChange: (value: FiltrosVisitasValue) => void
+  // Exibe o filtro de imobiliária (usado no Dashboard e em Relatórios)
+  comImobiliaria?: boolean
+}
+
+// Classes completas para o Tailwind detectar (não usar template dinâmico)
+const COLS: Record<number, string> = {
+  4: 'lg:grid-cols-4',
+  5: 'lg:grid-cols-5',
+  6: 'lg:grid-cols-6',
 }
 
 const ctrlClass =
   'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900'
 
-export default function FiltrosVisitas({ value, onChange }: Props) {
+export default function FiltrosVisitas({
+  value,
+  onChange,
+  comImobiliaria = false,
+}: Props) {
   const { data: session } = useSession()
   const gestorRestrito = session?.user?.role === 'GESTOR'
   const [empreendimentos, setEmpreendimentos] = useState<EmpOption[]>([])
+  const [imobiliarias, setImobiliarias] = useState<string[]>([])
 
   useEffect(() => {
     fetch('/api/empreendimentos')
@@ -59,13 +75,28 @@ export default function FiltrosVisitas({ value, onChange }: Props) {
       .catch(() => {})
   }, [])
 
+  useEffect(() => {
+    if (!comImobiliaria) return
+    fetch('/api/imobiliarias')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) =>
+        setImobiliarias(
+          Array.isArray(data) ? data.map((i: any) => i.nome as string) : []
+        )
+      )
+      .catch(() => {})
+  }, [comImobiliaria])
+
   const set = (patch: Partial<FiltrosVisitasValue>) =>
     onChange({ ...value, ...patch })
+
+  // Nº de colunas: base 4 (datas + tipo + origem) + empreendimento + imobiliária
+  const cols = 4 + (gestorRestrito ? 0 : 1) + (comImobiliaria ? 1 : 0)
 
   return (
     <div
       className={`bg-white rounded-lg shadow-sm p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 ${
-        gestorRestrito ? 'lg:grid-cols-4' : 'lg:grid-cols-5'
+        COLS[cols] || 'lg:grid-cols-5'
       }`}
     >
       <div>
@@ -108,6 +139,26 @@ export default function FiltrosVisitas({ value, onChange }: Props) {
             {empreendimentos.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {comImobiliaria && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Imobiliária
+          </label>
+          <select
+            value={value.imobiliaria}
+            onChange={(e) => set({ imobiliaria: e.target.value })}
+            className={ctrlClass}
+          >
+            <option value="">Todas</option>
+            {imobiliarias.map((nome) => (
+              <option key={nome} value={nome}>
+                {nome}
               </option>
             ))}
           </select>
@@ -162,5 +213,6 @@ export function filtrosParaQuery(value: FiltrosVisitasValue): string {
   if (value.comoSoube) params.set('comoSoube', value.comoSoube)
   if (value.empreendimentoId)
     params.set('empreendimentoId', value.empreendimentoId)
+  if (value.imobiliaria) params.set('imobiliaria', value.imobiliaria)
   return params.toString()
 }

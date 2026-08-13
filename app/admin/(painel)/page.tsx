@@ -83,6 +83,7 @@ export default function DashboardPage() {
       if (filtros.dataFim) p.set('dataFim', filtros.dataFim)
       if (filtros.empreendimentoId)
         p.set('empreendimentoId', filtros.empreendimentoId)
+      if (filtros.imobiliaria) p.set('imobiliaria', filtros.imobiliaria)
       if (filtros.comoSoube) p.set('comoSoube', filtros.comoSoube)
       if (tipo) p.set('comoChegou', tipo)
       else if (filtros.comoChegou) p.set('comoChegou', filtros.comoChegou)
@@ -130,7 +131,7 @@ export default function DashboardPage() {
     <div className="max-w-6xl">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
 
-      <FiltrosVisitas value={filtros} onChange={setFiltros} />
+      <FiltrosVisitas value={filtros} onChange={setFiltros} comImobiliaria />
 
       {carregando || !data ? (
         <p className="text-gray-500">Carregando...</p>

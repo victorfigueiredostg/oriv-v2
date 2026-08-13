@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const comoChegou = searchParams.get('comoChegou') || undefined
     const comoSoube = searchParams.get('comoSoube') || undefined
+    const imobiliaria = searchParams.get('imobiliaria') || undefined
     const empreendimentoIdParam = searchParams.get('empreendimentoId')
     const dataInicioStr = searchParams.get('dataInicio')
     const dataFimStr = searchParams.get('dataFim')
@@ -33,6 +34,7 @@ export async function GET(request: NextRequest) {
     const filtrosBase: any = {}
     if (comoChegou) filtrosBase.comoChegou = comoChegou
     if (comoSoube) filtrosBase.comoSoube = comoSoube
+    if (imobiliaria) filtrosBase.imobiliaria = imobiliaria
 
     // STAND/GESTOR: travados no próprio empreendimento (ignoram o parâmetro).
     // ADMIN: visão global, pode filtrar por um empreendimento.
