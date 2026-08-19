@@ -36,3 +36,38 @@ input::placeholder,
 textarea::placeholder {
   color: #6b7280; /* gray-500 */
 }
+
+/* ===== Impressão / Exportar PDF =====
+   Usado pelo botão "Exportar PDF" (window.print). Esconde a navegação e os
+   controles marcados com .no-print e imprime o conteúdo tal como exibido. */
+@media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  /* Esconde a barra lateral e qualquer elemento marcado como não-imprimível */
+  aside,
+  .no-print {
+    display: none !important;
+  }
+
+  /* O conteúdo ocupa a página inteira, sem rolagem/limite de largura */
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Força a impressão das cores de fundo (gráficos, selos, barras) */
+  html,
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background: #fff !important;
+  }
+
+  /* Evita cortar cada bloco/cartão no meio da quebra de página */
+  .area-impressao > * {
+    break-inside: avoid;
+  }
+}

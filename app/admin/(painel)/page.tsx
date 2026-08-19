@@ -129,14 +129,22 @@ export default function DashboardPage() {
 
   return (
     <div className="max-w-6xl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Dashboard</h1>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <button
+          onClick={() => window.print()}
+          className="no-print bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+        >
+          ↓ Exportar PDF
+        </button>
+      </div>
 
       <FiltrosVisitas value={filtros} onChange={setFiltros} comImobiliaria />
 
       {carregando || !data ? (
         <p className="text-gray-500">Carregando...</p>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 area-impressao">
           {/* Cartões-resumo */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             <div
