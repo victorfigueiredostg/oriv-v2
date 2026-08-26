@@ -160,10 +160,14 @@ export default function DashboardPage() {
               </p>
             </div>
             <div
-              onClick={() => abrirDetalhe('Agendados', 'AGENDADO_CORRETOR')}
+              onClick={() =>
+                abrirDetalhe('Agendado com Corretor', 'AGENDADO_CORRETOR')
+              }
               className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow"
             >
-              <p className="text-sm font-medium text-gray-600">Agendados</p>
+              <p className="text-sm font-medium text-gray-600">
+                Agendado com Corretor
+              </p>
               <p className="text-4xl font-bold text-green-600 mt-2">
                 {agendados}
               </p>
