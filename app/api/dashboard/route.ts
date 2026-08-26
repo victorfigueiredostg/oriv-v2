@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getCache, setCache } from '@/lib/cache'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,6 +30,16 @@ export async function GET(request: NextRequest) {
       inicio = new Date()
       inicio.setDate(inicio.getDate() - parseInt(periodoParam))
     }
+
+    // Cache curto por escopo + filtros: ameniza acesso simultâneo, reduzindo
+    // quantas queries chegam ao banco (pool pequeno na Hostinger).
+    const escopoCache =
+      session.user.role === 'ADMIN'
+        ? `admin:${empreendimentoIdParam || 'all'}`
+        : `${session.user.role}:${session.user.empreendimentoId ?? 'none'}`
+    const cacheKey = `dash:${escopoCache}:${dataInicioStr || ''}:${dataFimStr || ''}:${searchParams.get('periodo') || ''}:${comoChegou || ''}:${comoSoube || ''}:${imobiliaria || ''}`
+    const emCache = getCache<any>(cacheKey)
+    if (emCache) return NextResponse.json(emCache)
 
     // Filtros comuns (sem a janela de data)
     const filtrosBase: any = {}
@@ -275,7 +286,7 @@ export async function GET(request: NextRequest) {
           : 0
         : ((totalVisitas - totalAnterior) / totalAnterior) * 100
 
-    return NextResponse.json({
+    const resposta = {
       totalVisitas,
       mediaIdade,
       crescimento: {
@@ -293,7 +304,10 @@ export async function GET(request: NextRequest) {
       crossTipoOrigem,
       serieTemporal,
       matrizDiaHora: { matriz, totaisDia },
-    })
+    }
+    // Guarda por 45s (dados analíticos toleram leve defasagem)
+    setCache(cacheKey, resposta, 45000)
+    return NextResponse.json(resposta)
   } catch (error) {
     console.error('Erro ao buscar dashboard:', error)
     return NextResponse.json(
