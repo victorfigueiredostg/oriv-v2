@@ -48,7 +48,8 @@ model Visita {
   comoSoube        ComoSoube
   ondeMaisViu      String?        // "Onde mais viu/ouviu" — múltiplas origens (CSV de ComoSoube)
   cvStatus         String?        // CADASTRADO | NAO_CADASTRADO | NAO_PREENCHEU (verificado no CVCRM ao salvar)
-  cvConfirmadoEm   DateTime?      // quando o gestor confirmou o cadastro manual no CV
+  cvConfirmadoEm   DateTime?      // data em que o cadastro foi validado no CV (re-check diário ou confirmação manual)
+  cvVerificadoEm   DateTime?      // último re-check automático do CV (controle do job diário)
   salvoEm          DateTime       @default(now())
 
   @@index([empreendimentoId])
@@ -56,6 +57,7 @@ model Visita {
   @@index([corretor])
   @@index([comoSoube])
   @@index([imobiliaria])
+  @@index([cvVerificadoEm])
 }
 
 model Imobiliaria {
