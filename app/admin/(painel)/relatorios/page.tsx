@@ -68,7 +68,9 @@ export default function RelatoriosPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Relatórios</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">
+        Registros de Visitas
+      </h1>
 
       <FiltrosVisitas value={filtros} onChange={setFiltros} comImobiliaria />
 

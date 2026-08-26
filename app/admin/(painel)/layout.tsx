@@ -9,7 +9,7 @@ const NAV = [
   { href: '/admin', label: 'Dashboard', match: (p: string) => p === '/admin' },
   {
     href: '/admin/relatorios',
-    label: 'Relatórios',
+    label: 'Registros de Visitas',
     match: (p: string) => p.startsWith('/admin/relatorios'),
   },
   {
