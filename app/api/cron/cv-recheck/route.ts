@@ -17,10 +17,13 @@ import { statusCvPorTelefone } from '@/lib/cv'
 // Segurança: exige o segredo CRON_SECRET (query ?token= ou header
 // x-cron-secret) OU uma sessão de ADMIN (para acionar/testar manualmente).
 
-const LOTE_PADRAO = 40
+const LOTE_PADRAO = 25
 const LOTE_MAX = 150
-const PAUSA_MS = 250 // pausa entre chamadas à API do CV
+const PAUSA_MS = 120 // pausa entre chamadas à API do CV
 const JANELA_HORAS = 20 // não re-checa o mesmo contato antes disso
+// Teto de tempo por execução: retorna antes do timeout do cron (~30s).
+// O que não couber nesta rodada é pego na próxima.
+const TEMPO_MAX_MS = 18000
 
 const dormir = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -72,8 +75,12 @@ export async function GET(request: NextRequest) {
     let novosCadastrados = 0
     let semCadastro = 0
     let indefinidos = 0
+    let processados = 0
 
+    const inicio = Date.now()
     for (const v of alvos) {
+      // Para antes de estourar o timeout do cron; o resto fica pra próxima
+      if (Date.now() - inicio > TEMPO_MAX_MS) break
       const agora = new Date()
       let status: string | null = null
       try {
@@ -101,6 +108,7 @@ export async function GET(request: NextRequest) {
       }
 
       await prisma.visita.update({ where: { id: v.id }, data: dados })
+      processados++
       await dormir(PAUSA_MS)
     }
 
@@ -118,7 +126,8 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      processados: alvos.length,
+      processados,
+      candidatosNoLote: alvos.length,
       novosCadastrados,
       semCadastro,
       indefinidos,
