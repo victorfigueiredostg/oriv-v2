@@ -47,7 +47,7 @@ export default function DashboardPage() {
 
   const traduzirComoChegou = (valor: string) => {
     const traducoes: Record<string, string> = {
-      AGENDADO_CORRETOR: 'Agendado',
+      AGENDADO_CORRETOR: 'Agendado com Corretor',
       CLIENTE_PASSANTE: 'Passante',
       AGENDAMENTO_SELENA: 'Agendamento Selena',
     }
