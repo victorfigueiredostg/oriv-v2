@@ -124,6 +124,7 @@ export default function DashboardPage() {
       .reduce((s, x) => s + x._count, 0) || 0
   const agendados = somaTipo('AGENDADO_CORRETOR')
   const passantes = somaTipo('CLIENTE_PASSANTE')
+  const agendamentoSelena = somaTipo('AGENDAMENTO_SELENA')
   const pctTotal = (n: number) =>
     data && data.totalVisitas ? Math.round((n / data.totalVisitas) * 100) : 0
 
@@ -146,7 +147,7 @@ export default function DashboardPage() {
       ) : (
         <div className="space-y-6 area-impressao">
           {/* Cartões-resumo */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             <div
               onClick={() => abrirDetalhe('Total de visitas')}
               className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow"
@@ -168,6 +169,22 @@ export default function DashboardPage() {
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {pctTotal(agendados)}% do total
+              </p>
+            </div>
+            <div
+              onClick={() =>
+                abrirDetalhe('Agendamento Selena', 'AGENDAMENTO_SELENA')
+              }
+              className="bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-xl transition-shadow"
+            >
+              <p className="text-sm font-medium text-gray-600">
+                Agendamento Selena
+              </p>
+              <p className="text-4xl font-bold text-teal-600 mt-2">
+                {agendamentoSelena}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                {pctTotal(agendamentoSelena)}% do total
               </p>
             </div>
             <div

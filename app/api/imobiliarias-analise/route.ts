@@ -55,6 +55,7 @@ export async function GET(request: NextRequest) {
       total: number
       agendados: number
       passantes: number
+      agendamentoSelena: number
     }
     interface ClienteRow {
       nomeCliente: string
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest) {
       total: number
       agendados: number
       passantes: number
+      agendamentoSelena: number
       corretores: Map<string, number>
       empreend: Map<number, EmpAgg>
       clientes: ClienteRow[]
@@ -80,23 +82,27 @@ export async function GET(request: NextRequest) {
           total: 0,
           agendados: 0,
           passantes: 0,
+          agendamentoSelena: 0,
           corretores: new Map(),
           empreend: new Map(),
           clientes: [],
         } as Agg)
       const agendado = v.comoChegou === 'AGENDADO_CORRETOR'
       const passante = v.comoChegou === 'CLIENTE_PASSANTE'
+      const selena = v.comoChegou === 'AGENDAMENTO_SELENA'
       a.total++
       if (agendado) a.agendados++
       else if (passante) a.passantes++
+      else if (selena) a.agendamentoSelena++
       if (v.corretor)
         a.corretores.set(v.corretor, (a.corretores.get(v.corretor) || 0) + 1)
       const e =
         a.empreend.get(v.empreendimentoId) ||
-        ({ total: 0, agendados: 0, passantes: 0 } as EmpAgg)
+        ({ total: 0, agendados: 0, passantes: 0, agendamentoSelena: 0 } as EmpAgg)
       e.total++
       if (agendado) e.agendados++
       else if (passante) e.passantes++
+      else if (selena) e.agendamentoSelena++
       a.empreend.set(v.empreendimentoId, e)
       // linhas já vêm ordenadas por salvoEm desc, então a lista preserva a ordem
       a.clientes.push({
@@ -116,6 +122,7 @@ export async function GET(request: NextRequest) {
         total: a.total,
         agendados: a.agendados,
         passantes: a.passantes,
+        agendamentoSelena: a.agendamentoSelena,
         corretores: [...a.corretores.entries()]
           .map(([n, t]) => ({ nome: n, total: t }))
           .sort((x, y) => y.total - x.total),
@@ -125,6 +132,7 @@ export async function GET(request: NextRequest) {
             total: e.total,
             agendados: e.agendados,
             passantes: e.passantes,
+            agendamentoSelena: e.agendamentoSelena,
           }))
           .sort((x, y) => y.total - x.total),
         clientes: a.clientes,

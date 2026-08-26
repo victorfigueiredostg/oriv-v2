@@ -78,6 +78,7 @@ enum Role {
 enum ComoChegou {
   AGENDADO_CORRETOR
   CLIENTE_PASSANTE
+  AGENDAMENTO_SELENA
 }
 
 enum ComoSoube {
@@ -94,5 +95,6 @@ enum ComoSoube {
   OBRA
   FAIXA_PASSARELA_SAO_CRISTOVAO
   GOOGLE
+  SITE
   TV_HOSPITAL_SAO_RAFAEL
 }

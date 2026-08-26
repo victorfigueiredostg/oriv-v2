@@ -19,12 +19,14 @@ interface ImobAnalise {
   total: number
   agendados: number
   passantes: number
+  agendamentoSelena: number
   corretores: { nome: string; total: number }[]
   porEmpreendimento: {
     nome: string
     total: number
     agendados: number
     passantes: number
+    agendamentoSelena: number
   }[]
   clientes: {
     nomeCliente: string
@@ -195,6 +197,7 @@ export default function ImobiliariasPage() {
         'Total de visitas': im.total,
         '% do total': `${pct(im.total)}%`,
         Agendados: im.agendados,
+        'Agendamento Selena': im.agendamentoSelena,
         Passantes: im.passantes,
       }))
 
@@ -206,6 +209,7 @@ export default function ImobiliariasPage() {
             Empreendimento: e.nome,
             'Total de visitas': e.total,
             Agendados: e.agendados,
+            'Agendamento Selena': e.agendamentoSelena,
             Passantes: e.passantes,
           })
         )
@@ -343,6 +347,7 @@ export default function ImobiliariasPage() {
                     'Imobiliária',
                     'Visitas',
                     'Agendados',
+                    'Agend. Selena',
                     'Passantes',
                     'Corretores',
                     '',
@@ -377,6 +382,9 @@ export default function ImobiliariasPage() {
                       </td>
                       <td className="px-3 py-2 text-sm text-gray-700">
                         {im.agendados}
+                      </td>
+                      <td className="px-3 py-2 text-sm text-gray-700">
+                        {im.agendamentoSelena}
                       </td>
                       <td className="px-3 py-2 text-sm text-gray-700">
                         {im.passantes}
@@ -417,7 +425,7 @@ export default function ImobiliariasPage() {
                     </tr>
                     {expandida === im.nome && (
                       <tr>
-                        <td colSpan={7} className="bg-gray-50 px-3 py-4">
+                        <td colSpan={8} className="bg-gray-50 px-3 py-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                               <h4 className="font-semibold text-gray-800 mb-2">
@@ -460,6 +468,9 @@ export default function ImobiliariasPage() {
                                       Agendamento
                                     </th>
                                     <th className="text-center font-medium py-1 px-2">
+                                      Ag. Selena
+                                    </th>
+                                    <th className="text-center font-medium py-1 px-2">
                                       Passante
                                     </th>
                                   </tr>
@@ -475,6 +486,9 @@ export default function ImobiliariasPage() {
                                       </td>
                                       <td className="py-1 px-2 text-center font-medium text-gray-900">
                                         {e.agendados}
+                                      </td>
+                                      <td className="py-1 px-2 text-center font-medium text-gray-900">
+                                        {e.agendamentoSelena}
                                       </td>
                                       <td className="py-1 px-2 text-center font-medium text-gray-900">
                                         {e.passantes}

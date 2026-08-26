@@ -326,6 +326,7 @@ export default function VisitaPage() {
                 <option value="">Selecione uma opção</option>
                 <option value="AGENDADO_CORRETOR">Agendei com um Corretor</option>
                 <option value="CLIENTE_PASSANTE">Cliente Passante</option>
+                <option value="AGENDAMENTO_SELENA">Agendamento Selena</option>
               </select>
             </div>
 

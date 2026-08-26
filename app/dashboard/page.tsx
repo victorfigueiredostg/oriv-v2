@@ -49,6 +49,7 @@ export default function DashboardPage() {
     const traducoes: Record<string, string> = {
       AGENDADO_CORRETOR: 'Agendado',
       CLIENTE_PASSANTE: 'Passante',
+      AGENDAMENTO_SELENA: 'Agendamento Selena',
     }
     return traducoes[valor] || valor
   }
@@ -66,6 +67,8 @@ export default function DashboardPage() {
       INDICACAO: 'Indicação',
       OUTDOOR: 'Outdoor',
       OBRA: 'Obra',
+      GOOGLE: 'Pesquisa no Google',
+      SITE: 'Site',
     }
     return traducoes[valor] || valor
   }

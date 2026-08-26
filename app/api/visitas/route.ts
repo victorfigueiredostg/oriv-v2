@@ -19,6 +19,7 @@ const COMO_SOUBE_VALUES = [
   'OBRA',
   'FAIXA_PASSARELA_SAO_CRISTOVAO',
   'GOOGLE',
+  'SITE',
   'TV_HOSPITAL_SAO_RAFAEL',
 ] as const
 
@@ -30,7 +31,11 @@ const visitaSchema = z.object({
     .int('Idade deve ser um número inteiro')
     .min(0, 'Idade inválida')
     .max(120, 'Idade inválida'),
-  comoChegou: z.enum(['AGENDADO_CORRETOR', 'CLIENTE_PASSANTE']),
+  comoChegou: z.enum([
+    'AGENDADO_CORRETOR',
+    'CLIENTE_PASSANTE',
+    'AGENDAMENTO_SELENA',
+  ]),
   corretor: z.string().min(1, 'Nome do corretor é obrigatório'),
   imobiliaria: z.string().min(1, 'Nome da imobiliária é obrigatório'),
   comoSoube: z.enum(COMO_SOUBE_VALUES),

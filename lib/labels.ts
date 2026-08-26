@@ -4,6 +4,7 @@
 export const COMO_CHEGOU_LABELS: Record<string, string> = {
   AGENDADO_CORRETOR: 'Agendado com Corretor',
   CLIENTE_PASSANTE: 'Cliente Passante',
+  AGENDAMENTO_SELENA: 'Agendamento Selena',
 }
 
 export const COMO_SOUBE_LABELS: Record<string, string> = {
@@ -20,6 +21,7 @@ export const COMO_SOUBE_LABELS: Record<string, string> = {
   OBRA: 'Obra',
   FAIXA_PASSARELA_SAO_CRISTOVAO: 'Faixa na passarela de São Cristóvão',
   GOOGLE: 'Pesquisa no Google',
+  SITE: 'Site',
   TV_HOSPITAL_SAO_RAFAEL: 'Tv do Hospital São Rafael',
 }
 
