@@ -50,6 +50,7 @@ model Visita {
   cvStatus         String?        // CADASTRADO | NAO_CADASTRADO | NAO_PREENCHEU (verificado no CVCRM ao salvar)
   cvConfirmadoEm   DateTime?      // data em que o cadastro foi validado no CV (re-check diário ou confirmação manual)
   cvVerificadoEm   DateTime?      // último re-check automático do CV (controle do job diário)
+  motivoLost       String?        // motivo de "lost" (texto; opções gerenciadas em MotivoLost)
   salvoEm          DateTime       @default(now())
 
   @@index([empreendimentoId])
@@ -58,6 +59,7 @@ model Visita {
   @@index([comoSoube])
   @@index([imobiliaria])
   @@index([cvVerificadoEm])
+  @@index([motivoLost])
 }
 
 model Imobiliaria {
@@ -70,6 +72,15 @@ model Imobiliaria {
 model Configuracao {
   chave String @id
   valor String
+}
+
+// Opções do dropdown "Motivo de lost" (gerenciadas em Configurações).
+// Inativar remove do dropdown mas preserva o histórico das visitas.
+model MotivoLost {
+  id       Int      @id @default(autoincrement())
+  nome     String   @unique
+  ativo    Boolean  @default(true)
+  criadoEm DateTime @default(now())
 }
 
 enum Role {

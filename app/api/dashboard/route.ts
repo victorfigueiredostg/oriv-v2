@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const comoChegou = searchParams.get('comoChegou') || undefined
     const comoSoube = searchParams.get('comoSoube') || undefined
     const imobiliaria = searchParams.get('imobiliaria') || undefined
+    const motivoLost = searchParams.get('motivoLost') || undefined
     const empreendimentoIdParam = searchParams.get('empreendimentoId')
     const dataInicioStr = searchParams.get('dataInicio')
     const dataFimStr = searchParams.get('dataFim')
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
       session.user.role === 'ADMIN'
         ? `admin:${empreendimentoIdParam || 'all'}`
         : `${session.user.role}:${session.user.empreendimentoId ?? 'none'}`
-    const cacheKey = `dash:${escopoCache}:${dataInicioStr || ''}:${dataFimStr || ''}:${searchParams.get('periodo') || ''}:${comoChegou || ''}:${comoSoube || ''}:${imobiliaria || ''}`
+    const cacheKey = `dash:${escopoCache}:${dataInicioStr || ''}:${dataFimStr || ''}:${searchParams.get('periodo') || ''}:${comoChegou || ''}:${comoSoube || ''}:${imobiliaria || ''}:${motivoLost || ''}`
     const emCache = getCache<any>(cacheKey)
     if (emCache) return NextResponse.json(emCache)
 
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
     if (comoChegou) filtrosBase.comoChegou = comoChegou
     if (comoSoube) filtrosBase.comoSoube = comoSoube
     if (imobiliaria) filtrosBase.imobiliaria = imobiliaria
+    if (motivoLost) filtrosBase.motivoLost = motivoLost
 
     // STAND/GESTOR: travados no próprio empreendimento (ignoram o parâmetro).
     // ADMIN: visão global, pode filtrar por um empreendimento.
@@ -186,6 +188,16 @@ export async function GET(request: NextRequest) {
       _count: true,
     })
 
+    // Motivos de "lost" (quantitativo/rosca) — só visitas com motivo informado
+    const gruposMotivo = await prisma.visita.groupBy({
+      by: ['motivoLost'],
+      where: { ...where, motivoLost: { not: null } },
+      _count: true,
+    })
+    const motivosLostTotais = gruposMotivo
+      .map((g) => ({ nome: g.motivoLost as string, total: g._count }))
+      .sort((a, b) => b.total - a.total)
+
     // Série temporal (por dia) e matriz dia-da-semana x hora — agregadas em JS
     // no fuso de Brasília (America/Sao_Paulo), a partir dos salvoEm filtrados.
     const linhas = await prisma.visita.findMany({
@@ -302,6 +314,7 @@ export async function GET(request: NextRequest) {
       topImobiliarias,
       rankEmpreendimentos,
       crossTipoOrigem,
+      motivosLostTotais,
       serieTemporal,
       matrizDiaHora: { matriz, totaisDia },
     }

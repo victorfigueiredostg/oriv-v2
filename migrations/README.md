@@ -27,3 +27,4 @@ SQL numerado aqui**, versionado junto com o código.
 | `0002_como_chegou_selena_e_como_soube_site.sql` | Adiciona `AGENDAMENTO_SELENA` e `SITE` aos ENUMs de `Visita` | ✅ aplicada |
 | `0003_index_imobiliaria.sql` | Índice em `Visita.imobiliaria` (filtro/agrupamento por imobiliária) | ⬜ **pendente — rodar agora** |
 | `0004_cv_verificado_em.sql` | Coluna `Visita.cvVerificadoEm` + índice (re-check diário do CV) | ⬜ **pendente — rodar agora** |
+| `0005_motivo_lost.sql` | Coluna `Visita.motivoLost` + índice + tabela `MotivoLost` | ⬜ **pendente — rodar agora** |

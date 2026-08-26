@@ -30,6 +30,7 @@ interface DashboardData {
   topImobiliarias: { imobiliaria: string; _count: number }[]
   rankEmpreendimentos: { nome: string; total: number }[]
   crossTipoOrigem: { comoChegou: string; comoSoube: string; _count: number }[]
+  motivosLostTotais: { nome: string; total: number }[]
   serieTemporal: { dia: string; total: number }[]
   matrizDiaHora: { matriz: number[][]; totaisDia: number[] }
 }
@@ -140,7 +141,12 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <FiltrosVisitas value={filtros} onChange={setFiltros} comImobiliaria />
+      <FiltrosVisitas
+        value={filtros}
+        onChange={setFiltros}
+        comImobiliaria
+        comMotivoLost
+      />
 
       {carregando || !data ? (
         <p className="text-gray-500">Carregando...</p>
@@ -269,6 +275,19 @@ export default function DashboardPage() {
               Tipo de Visita × Origem
             </h2>
             <CruzamentoTipoOrigem data={data.crossTipoOrigem} />
+          </div>
+
+          {/* Motivos de Lost */}
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">
+              Motivos de Lost
+            </h2>
+            <OrigemPizza
+              data={data.motivosLostTotais.map((m) => ({
+                comoSoube: m.nome,
+                _count: m.total,
+              }))}
+            />
           </div>
 
           {/* Heatmap dia da semana x hora */}

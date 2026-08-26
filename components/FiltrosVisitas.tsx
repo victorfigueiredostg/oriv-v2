@@ -11,6 +11,7 @@ export interface FiltrosVisitasValue {
   comoSoube: string // '' = todas
   empreendimentoId: string // '' = todos
   imobiliaria: string // '' = todas (nome exato)
+  motivoLost: string // '' = todos (nome exato)
 }
 
 const dataISO = (d: Date) => d.toISOString().slice(0, 10)
@@ -27,6 +28,7 @@ export function filtrosPadrao(): FiltrosVisitasValue {
     comoSoube: '',
     empreendimentoId: '',
     imobiliaria: '',
+    motivoLost: '',
   }
 }
 
@@ -38,15 +40,10 @@ interface EmpOption {
 interface Props {
   value: FiltrosVisitasValue
   onChange: (value: FiltrosVisitasValue) => void
-  // Exibe o filtro de imobiliária (usado no Dashboard e em Relatórios)
+  // Exibe o filtro de imobiliária (usado no Dashboard e em Registros)
   comImobiliaria?: boolean
-}
-
-// Classes completas para o Tailwind detectar (não usar template dinâmico)
-const COLS: Record<number, string> = {
-  4: 'lg:grid-cols-4',
-  5: 'lg:grid-cols-5',
-  6: 'lg:grid-cols-6',
+  // Exibe o filtro de "Motivo de lost" (Dashboard e Registros)
+  comMotivoLost?: boolean
 }
 
 const ctrlClass =
@@ -56,11 +53,13 @@ export default function FiltrosVisitas({
   value,
   onChange,
   comImobiliaria = false,
+  comMotivoLost = false,
 }: Props) {
   const { data: session } = useSession()
   const gestorRestrito = session?.user?.role === 'GESTOR'
   const [empreendimentos, setEmpreendimentos] = useState<EmpOption[]>([])
   const [imobiliarias, setImobiliarias] = useState<string[]>([])
+  const [motivosLost, setMotivosLost] = useState<string[]>([])
 
   useEffect(() => {
     fetch('/api/empreendimentos')
@@ -87,18 +86,23 @@ export default function FiltrosVisitas({
       .catch(() => {})
   }, [comImobiliaria])
 
+  useEffect(() => {
+    if (!comMotivoLost) return
+    fetch('/api/motivos-lost')
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data) =>
+        setMotivosLost(
+          Array.isArray(data) ? data.map((m: any) => m.nome as string) : []
+        )
+      )
+      .catch(() => {})
+  }, [comMotivoLost])
+
   const set = (patch: Partial<FiltrosVisitasValue>) =>
     onChange({ ...value, ...patch })
 
-  // Nº de colunas: base 4 (datas + tipo + origem) + empreendimento + imobiliária
-  const cols = 4 + (gestorRestrito ? 0 : 1) + (comImobiliaria ? 1 : 0)
-
   return (
-    <div
-      className={`bg-white rounded-lg shadow-sm p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 ${
-        COLS[cols] || 'lg:grid-cols-5'
-      }`}
-    >
+    <div className="bg-white rounded-lg shadow-sm p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Data início
@@ -200,6 +204,26 @@ export default function FiltrosVisitas({
           ))}
         </select>
       </div>
+
+      {comMotivoLost && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Motivo de lost
+          </label>
+          <select
+            value={value.motivoLost}
+            onChange={(e) => set({ motivoLost: e.target.value })}
+            className={ctrlClass}
+          >
+            <option value="">Todos</option>
+            {motivosLost.map((nome) => (
+              <option key={nome} value={nome}>
+                {nome}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
     </div>
   )
 }
@@ -214,5 +238,6 @@ export function filtrosParaQuery(value: FiltrosVisitasValue): string {
   if (value.empreendimentoId)
     params.set('empreendimentoId', value.empreendimentoId)
   if (value.imobiliaria) params.set('imobiliaria', value.imobiliaria)
+  if (value.motivoLost) params.set('motivoLost', value.motivoLost)
   return params.toString()
 }

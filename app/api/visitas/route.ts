@@ -132,11 +132,13 @@ export async function GET(request: NextRequest) {
     const comoChegou = searchParams.get('comoChegou')
     const comoSoube = searchParams.get('comoSoube')
     const imobiliaria = searchParams.get('imobiliaria')
+    const motivoLost = searchParams.get('motivoLost')
     const dataInicioStr = searchParams.get('dataInicio')
     const dataFimStr = searchParams.get('dataFim')
     if (comoChegou) where.comoChegou = comoChegou
     if (comoSoube) where.comoSoube = comoSoube
     if (imobiliaria) where.imobiliaria = imobiliaria
+    if (motivoLost) where.motivoLost = motivoLost
     if (dataInicioStr || dataFimStr) {
       where.salvoEm = {}
       if (dataInicioStr) where.salvoEm.gte = new Date(`${dataInicioStr}T00:00:00`)
