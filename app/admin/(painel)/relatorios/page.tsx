@@ -10,12 +10,14 @@ import {
   traduzirComoChegou,
   traduzirComoSoube,
   formatarDataHora,
+  faixaDaIdade,
 } from '@/lib/labels'
 
 interface Visita {
   id: number
   nomeCliente: string
   idadeCliente: number | null
+  faixaEtaria: string | null
   telefone: string | null
   corretor: string
   imobiliaria: string
@@ -278,8 +280,8 @@ export default function RegistrosVisitasPage() {
                 {open && (
                   <div className="border-t border-dashed border-gray-300 p-4">
                     <div className="grid gap-x-5 gap-y-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                      <Campo rotulo="Idade">
-                        {v.idadeCliente != null ? `${v.idadeCliente} anos` : '—'}
+                      <Campo rotulo="Faixa etária">
+                        {v.faixaEtaria || faixaDaIdade(v.idadeCliente) || '—'}
                       </Campo>
 
                       <Campo rotulo="Primeiro contato">

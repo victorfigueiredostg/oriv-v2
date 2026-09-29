@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { COMO_CHEGOU_OPTIONS, COMO_SOUBE_OPTIONS } from '@/lib/labels'
+import {
+  COMO_CHEGOU_OPTIONS,
+  COMO_SOUBE_OPTIONS,
+  MOTIVO_LOST_COM_ALGUM,
+} from '@/lib/labels'
 
 export interface FiltrosVisitasValue {
   dataInicio: string // 'YYYY-MM-DD' ('' = sem limite)
@@ -215,7 +219,8 @@ export default function FiltrosVisitas({
             onChange={(e) => set({ motivoLost: e.target.value })}
             className={ctrlClass}
           >
-            <option value="">Todos</option>
+            <option value="">Nenhum</option>
+            <option value={MOTIVO_LOST_COM_ALGUM}>Todos (com motivo)</option>
             {motivosLost.map((nome) => (
               <option key={nome} value={nome}>
                 {nome}

@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { statusCvPorTelefone } from '@/lib/cv'
+import { MOTIVO_LOST_COM_ALGUM, FAIXA_ETARIA_OPCOES } from '@/lib/labels'
 import { z } from 'zod'
 
 const COMO_SOUBE_VALUES = [
@@ -26,11 +27,9 @@ const COMO_SOUBE_VALUES = [
 const visitaSchema = z.object({
   nomeCliente: z.string().min(1, 'Nome do cliente é obrigatório'),
   telefone: z.string().trim().optional(),
-  idadeCliente: z.coerce
-    .number({ message: 'Idade do cliente é obrigatória' })
-    .int('Idade deve ser um número inteiro')
-    .min(0, 'Idade inválida')
-    .max(120, 'Idade inválida'),
+  faixaEtaria: z.enum(FAIXA_ETARIA_OPCOES, {
+    message: 'Selecione a faixa etária',
+  }),
   comoChegou: z.enum([
     'AGENDADO_CORRETOR',
     'CLIENTE_PASSANTE',
@@ -138,7 +137,8 @@ export async function GET(request: NextRequest) {
     if (comoChegou) where.comoChegou = comoChegou
     if (comoSoube) where.comoSoube = comoSoube
     if (imobiliaria) where.imobiliaria = imobiliaria
-    if (motivoLost) where.motivoLost = motivoLost
+    if (motivoLost === MOTIVO_LOST_COM_ALGUM) where.motivoLost = { not: null }
+    else if (motivoLost) where.motivoLost = motivoLost
     if (dataInicioStr || dataFimStr) {
       where.salvoEm = {}
       if (dataInicioStr) where.salvoEm.gte = new Date(`${dataInicioStr}T00:00:00`)

@@ -28,3 +28,4 @@ SQL numerado aqui**, versionado junto com o código.
 | `0003_index_imobiliaria.sql` | Índice em `Visita.imobiliaria` (filtro/agrupamento por imobiliária) | ⬜ **pendente — rodar agora** |
 | `0004_cv_verificado_em.sql` | Coluna `Visita.cvVerificadoEm` + índice (re-check diário do CV) | ⬜ **pendente — rodar agora** |
 | `0005_motivo_lost.sql` | Coluna `Visita.motivoLost` + índice + tabela `MotivoLost` | ⬜ **pendente — rodar agora** |
+| `0006_faixa_etaria.sql` | Coluna `Visita.faixaEtaria` (faixa etária no cadastro) | ⬜ **pendente — rodar agora** |

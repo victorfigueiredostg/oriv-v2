@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import ImobiliariaInput from '@/components/ImobiliariaInput'
 import CorretorInput from '@/components/CorretorInput'
-import { opcoesComoSoube } from '@/lib/labels'
+import { opcoesComoSoube, FAIXA_ETARIA_OPCOES } from '@/lib/labels'
 
 export default function VisitaPage() {
   const { data: session, status } = useSession()
@@ -15,7 +15,7 @@ export default function VisitaPage() {
   const [formData, setFormData] = useState({
     nomeCliente: '',
     telefone: '',
-    idadeCliente: '',
+    faixaEtaria: '',
     comoChegou: '',
     corretor: '',
     imobiliaria: '',
@@ -147,7 +147,7 @@ export default function VisitaPage() {
       setFormData({
         nomeCliente: '',
         telefone: '',
-        idadeCliente: '',
+        faixaEtaria: '',
         comoChegou: '',
         corretor: '',
         imobiliaria: '',
@@ -284,27 +284,29 @@ export default function VisitaPage() {
                 ))}
             </div>
 
-            {/* Idade do Cliente */}
+            {/* Faixa etária do Cliente */}
             <div>
               <label
-                htmlFor="idadeCliente"
+                htmlFor="faixaEtaria"
                 className="block text-lg font-medium text-gray-700 mb-2"
               >
-                Idade do Cliente *
+                Faixa etária *
               </label>
-              <input
-                type="number"
-                id="idadeCliente"
-                name="idadeCliente"
-                value={formData.idadeCliente}
+              <select
+                id="faixaEtaria"
+                name="faixaEtaria"
+                value={formData.faixaEtaria}
                 onChange={handleChange}
                 required
-                min={0}
-                max={120}
-                inputMode="numeric"
                 className="w-full px-4 py-4 text-lg border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Idade em anos"
-              />
+              >
+                <option value="">Selecione uma opção</option>
+                {FAIXA_ETARIA_OPCOES.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Como chegou no Stand */}

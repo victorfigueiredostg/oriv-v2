@@ -17,7 +17,7 @@ import { traduzirComoSoube, formatarDataHora } from '@/lib/labels'
 
 interface DashboardData {
   totalVisitas: number
-  mediaIdade: { media: number | null; qtd: number }
+  faixasEtarias: { faixa: string; total: number }[]
   crescimento: { atual: number; anterior: number; percentual: number }
   visitasPorComoSoube: { comoSoube: string; _count: number }[]
   ondeMaisViuTotais: { comoSoube: string; _count: number }[]
@@ -128,6 +128,9 @@ export default function DashboardPage() {
   const agendamentoSelena = somaTipo('AGENDAMENTO_SELENA')
   const pctTotal = (n: number) =>
     data && data.totalVisitas ? Math.round((n / data.totalVisitas) * 100) : 0
+  const faixaTop = data?.faixasEtarias
+    ? [...data.faixasEtarias].sort((a, b) => b.total - a.total)[0]
+    : undefined
 
   return (
     <div className="max-w-6xl">
@@ -211,17 +214,15 @@ export default function DashboardPage() {
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6">
               <p className="text-sm font-medium text-gray-600">
-                Média de idade do lead
+                Faixa etária predominante
               </p>
               <p className="text-4xl font-bold text-purple-600 mt-2">
-                {data.mediaIdade.media != null
-                  ? `${data.mediaIdade.media} anos`
-                  : '—'}
+                {faixaTop ? faixaTop.faixa : '—'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {data.mediaIdade.qtd > 0
-                  ? `Baseado em ${data.mediaIdade.qtd} lead(s) com idade informada`
-                  : 'Nenhum lead com idade informada no filtro'}
+                {faixaTop
+                  ? `${faixaTop.total} lead(s) nessa faixa`
+                  : 'Nenhuma faixa informada no filtro'}
               </p>
             </div>
           </div>

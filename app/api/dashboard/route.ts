@@ -3,6 +3,11 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getCache, setCache } from '@/lib/cache'
+import {
+  MOTIVO_LOST_COM_ALGUM,
+  faixaDaIdade,
+  FAIXA_ETARIA_OPCOES,
+} from '@/lib/labels'
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,7 +52,9 @@ export async function GET(request: NextRequest) {
     if (comoChegou) filtrosBase.comoChegou = comoChegou
     if (comoSoube) filtrosBase.comoSoube = comoSoube
     if (imobiliaria) filtrosBase.imobiliaria = imobiliaria
-    if (motivoLost) filtrosBase.motivoLost = motivoLost
+    if (motivoLost === MOTIVO_LOST_COM_ALGUM)
+      filtrosBase.motivoLost = { not: null }
+    else if (motivoLost) filtrosBase.motivoLost = motivoLost
 
     // STAND/GESTOR: travados no próprio empreendimento (ignoram o parâmetro).
     // ADMIN: visão global, pode filtrar por um empreendimento.
@@ -83,20 +90,6 @@ export async function GET(request: NextRequest) {
     // Queries em sequência (não em paralelo) para reduzir a pressão de
     // conexões/threads no engine do Prisma em ambiente compartilhado.
     const totalVisitas = await prisma.visita.count({ where })
-
-    // Média de idade dos leads no filtro selecionado (ignora idades não informadas)
-    const aggIdade = await prisma.visita.aggregate({
-      where,
-      _avg: { idadeCliente: true },
-      _count: { idadeCliente: true },
-    })
-    const mediaIdade = {
-      media:
-        aggIdade._avg.idadeCliente != null
-          ? Math.round(aggIdade._avg.idadeCliente)
-          : null,
-      qtd: aggIdade._count.idadeCliente,
-    }
 
     const totalAnterior = wherePeriodoAnterior
       ? await prisma.visita.count({ where: wherePeriodoAnterior })
@@ -202,8 +195,18 @@ export async function GET(request: NextRequest) {
     // no fuso de Brasília (America/Sao_Paulo), a partir dos salvoEm filtrados.
     const linhas = await prisma.visita.findMany({
       where,
-      select: { salvoEm: true, comoSoube: true, ondeMaisViu: true },
+      select: {
+        salvoEm: true,
+        comoSoube: true,
+        ondeMaisViu: true,
+        faixaEtaria: true,
+        idadeCliente: true,
+      },
     })
+
+    // Distribuição por faixa etária (usa faixaEtaria; para registros antigos,
+    // deriva a faixa da idade numérica)
+    const faixaMap = new Map<string, number>()
 
     const fmtData = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Sao_Paulo',
@@ -239,7 +242,16 @@ export async function GET(request: NextRequest) {
       { total: number; canais: Map<string, number> }
     >()
 
-    for (const { salvoEm, comoSoube, ondeMaisViu } of linhas) {
+    for (const {
+      salvoEm,
+      comoSoube,
+      ondeMaisViu,
+      faixaEtaria,
+      idadeCliente,
+    } of linhas) {
+      const faixa = faixaEtaria || faixaDaIdade(idadeCliente)
+      if (faixa) faixaMap.set(faixa, (faixaMap.get(faixa) || 0) + 1)
+
       const dia = fmtData.format(salvoEm) // YYYY-MM-DD
       serieMap.set(dia, (serieMap.get(dia) || 0) + 1)
 
@@ -272,6 +284,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Faixas na ordem canônica, só as que têm registros
+    const faixasEtarias = FAIXA_ETARIA_OPCOES.map((faixa) => ({
+      faixa,
+      total: faixaMap.get(faixa) || 0,
+    })).filter((f) => f.total > 0)
+
     const serieTemporal = [...serieMap.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([dia, total]) => ({ dia, total }))
@@ -300,7 +318,7 @@ export async function GET(request: NextRequest) {
 
     const resposta = {
       totalVisitas,
-      mediaIdade,
+      faixasEtarias,
       crescimento: {
         atual: totalVisitas,
         anterior: totalAnterior,

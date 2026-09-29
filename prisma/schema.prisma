@@ -40,7 +40,8 @@ model Visita {
   usuarioId        Int
   usuario          Usuario        @relation(fields: [usuarioId], references: [id])
   nomeCliente      String
-  idadeCliente     Int?           // idade do lead em anos; nullable p/ não quebrar registros antigos
+  idadeCliente     Int?           // idade numérica (legado); mantido p/ registros antigos
+  faixaEtaria      String?        // faixa etária do lead (novo formato do cadastro)
   telefone         String?        // telefone do lead; opcional (usado tb na verificação no CVCRM)
   comoChegou       ComoChegou
   corretor         String

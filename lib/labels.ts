@@ -67,6 +67,31 @@ export function opcoesComoSoube(slug?: string) {
   ]
 }
 
+// Valor sentinela do filtro "Motivo de lost" = "Todos" (visitas com QUALQUER
+// motivo preenchido). '' no filtro significa "Nenhum" (sem filtro).
+export const MOTIVO_LOST_COM_ALGUM = '__com_motivo__'
+
+// Faixas etárias do cadastro de visita (armazenadas como texto).
+export const FAIXA_ETARIA_OPCOES = [
+  'Até 24',
+  '25–34',
+  '35–44',
+  '45–54',
+  '55–64',
+  '65+',
+] as const
+
+// Converte uma idade numérica (registros antigos) na faixa correspondente.
+export function faixaDaIdade(idade: number | null | undefined): string | null {
+  if (idade == null) return null
+  if (idade <= 24) return 'Até 24'
+  if (idade <= 34) return '25–34'
+  if (idade <= 44) return '35–44'
+  if (idade <= 54) return '45–54'
+  if (idade <= 64) return '55–64'
+  return '65+'
+}
+
 export const CV_STATUS_LABELS: Record<string, string> = {
   CADASTRADO: 'Cadastrado',
   NAO_CADASTRADO: 'Não cadastrado',
