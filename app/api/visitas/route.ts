@@ -132,6 +132,7 @@ export async function GET(request: NextRequest) {
     const comoSoube = searchParams.get('comoSoube')
     const imobiliaria = searchParams.get('imobiliaria')
     const motivoLost = searchParams.get('motivoLost')
+    const cvCadastro = searchParams.get('cvCadastro') // 'sim' | 'nao'
     const dataInicioStr = searchParams.get('dataInicio')
     const dataFimStr = searchParams.get('dataFim')
     if (comoChegou) where.comoChegou = comoChegou
@@ -139,6 +140,11 @@ export async function GET(request: NextRequest) {
     if (imobiliaria) where.imobiliaria = imobiliaria
     if (motivoLost === MOTIVO_LOST_COM_ALGUM) where.motivoLost = { not: null }
     else if (motivoLost) where.motivoLost = motivoLost
+    // Cadastro no CV: 'sim' = só CADASTRADO; 'nao' = tudo que NÃO é CADASTRADO
+    // (inclui não cadastrado, não preencheu e não verificado/null)
+    if (cvCadastro === 'sim') where.cvStatus = 'CADASTRADO'
+    else if (cvCadastro === 'nao')
+      where.OR = [{ cvStatus: null }, { cvStatus: { not: 'CADASTRADO' } }]
     if (dataInicioStr || dataFimStr) {
       where.salvoEm = {}
       if (dataInicioStr) where.salvoEm.gte = new Date(`${dataInicioStr}T00:00:00`)

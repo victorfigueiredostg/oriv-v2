@@ -59,7 +59,7 @@ const COLUNAS: Coluna[] = [
   },
   {
     key: 'cv',
-    label: 'Cadastro no CV',
+    label: 'Status no CV',
     get: (v) => (v.cvStatus ? CV_STATUS_LABELS[v.cvStatus] || v.cvStatus : ''),
   },
   {
@@ -92,6 +92,8 @@ export default function RelatorioVisitas({
     Object.fromEntries(COLUNAS.map((c) => [c.key, PADRAO.has(c.key)]))
   )
   const [gerando, setGerando] = useState<'excel' | 'pdf' | null>(null)
+  // Filtro de cadastro no CV: 'todos' | 'sim' (cadastrados) | 'nao' (não)
+  const [cvFiltro, setCvFiltro] = useState<'todos' | 'sim' | 'nao'>('todos')
 
   const marcadas = COLUNAS.filter((c) => sel[c.key])
   const toggle = (key: string) => setSel((s) => ({ ...s, [key]: !s[key] }))
@@ -103,8 +105,9 @@ export default function RelatorioVisitas({
   const periodo = `${filtros.dataInicio || 'inicio'}_a_${filtros.dataFim || 'fim'}`
 
   const buscarVisitas = async (): Promise<any[]> => {
+    const cvParam = cvFiltro !== 'todos' ? `&cvCadastro=${cvFiltro}` : ''
     const res = await fetch(
-      `/api/visitas?${filtrosParaQuery(filtros)}&limit=100000`
+      `/api/visitas?${filtrosParaQuery(filtros)}${cvParam}&limit=100000`
     )
     const data = await res.json()
     return data.visitas || []
@@ -198,8 +201,29 @@ export default function RelatorioVisitas({
               </button>
             </div>
             <p className="text-sm text-gray-500 mb-4">
-              Selecione as colunas. O relatório usa os{' '}
-              <b>filtros atuais da tela</b>.
+              O relatório usa os <b>filtros atuais da tela</b>. Abaixo você
+              escolhe o filtro de CV e as colunas.
+            </p>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cadastro no CV
+              </label>
+              <select
+                value={cvFiltro}
+                onChange={(e) =>
+                  setCvFiltro(e.target.value as 'todos' | 'sim' | 'nao')
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 bg-white focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="todos">Todos</option>
+                <option value="sim">Somente cadastrados no CV</option>
+                <option value="nao">Somente não cadastrados</option>
+              </select>
+            </div>
+
+            <p className="text-sm font-semibold text-gray-700 mb-2">
+              Colunas do relatório
             </p>
 
             <div className="flex gap-3 mb-3 text-sm">
