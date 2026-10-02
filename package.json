@@ -25,6 +25,8 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "cloudinary": "^2.10.0",
     "dotenv": "^17.4.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "mariadb": "^3.5.2",
     "next": "16.2.6",
     "next-auth": "^4.24.15",

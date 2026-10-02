@@ -12,6 +12,7 @@ import {
   formatarDataHora,
   faixaDaIdade,
 } from '@/lib/labels'
+import RelatorioVisitas from '@/components/RelatorioVisitas'
 
 interface Visita {
   id: number
@@ -143,9 +144,12 @@ export default function RegistrosVisitasPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">
-        Registros de Visitas
-      </h1>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          Registros de Visitas
+        </h1>
+        <RelatorioVisitas filtros={filtros} />
+      </div>
 
       <FiltrosVisitas
         value={filtros}
